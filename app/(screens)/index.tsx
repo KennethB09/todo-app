@@ -196,9 +196,6 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </Link>
 
-
-      {/* {showDeleteModal && <DeleteModal setShowDeleteModal={setShowDeleteModal} showDeleteModal={showDeleteModal} id={deleteTodoId}/>} */}
-
     </SafeAreaView>
   );
 }

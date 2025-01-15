@@ -8,11 +8,8 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "backgroundColor": "#ffffff",
       "image": "./assets/images/splash-image.png",
-      "dark": {
-        "backgroundColor": "#1e1e1e"
-      },
+      "backgroundColor": "#ffffff",
       "resizeMode": "cover"
     },
     "newArchEnabled": true,
