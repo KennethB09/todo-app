@@ -158,6 +158,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
+      
       <StatusBar barStyle={colorScheme === 'dark' ? "light-content" : "dark-content"} backgroundColor={theme.background} />
       <Container>
         <Animated.FlatList

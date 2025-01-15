@@ -9,6 +9,8 @@ import { Poppins_400Regular, Poppins_500Medium } from "@expo-google-fonts/poppin
 import { ThemeProvider } from '@/context/ThemeContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+SplashScreen.preventAutoHideAsync()
+
 export default function RootLayout() {
 
   const [loaded, error] = useFonts({
@@ -34,6 +36,7 @@ export default function RootLayout() {
             <Stack>
               <Stack.Screen name="(screens)" options={{ headerShown: false }} />
               <Stack.Screen name="todo" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
             </Stack>
           </TodoProvider>
         </TodoListDataProvider>
