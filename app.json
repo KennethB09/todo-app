@@ -1,12 +1,20 @@
 {
   "expo": {
-    "name": "todo-app",
+    "name": "TODOit",
     "slug": "todo-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#ffffff",
+      "image": "./assets/images/splash-image.png",
+      "dark": {
+        "backgroundColor": "#1e1e1e"
+      },
+      "resizeMode": "cover"
+    },
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
@@ -14,8 +22,9 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "backgroundColor": "#1e1e1e"
+      },
+      "package": "com.kennethb091.todoapp"
     },
     "web": {
       "bundler": "metro",
@@ -27,12 +36,15 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#ffffff",
+          "image": "./assets/images/splash-image.png",
+          "dark": {
+            "backgroundColor": "#1e1e1e"
+          },
+          "resizeMode": "cover"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

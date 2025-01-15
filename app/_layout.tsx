@@ -1,39 +1,44 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import 'expo-dev-client';
+import { Stack } from "expo-router";
+import { TodoProvider } from "@/context/context";
+import { TodoListDataProvider } from "@/context/todoListContext";
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import { Poppins_400Regular, Poppins_500Medium } from "@expo-google-fonts/poppins";
+import { ThemeProvider } from '@/context/ThemeContext';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+
+  const [loaded, error] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium
   });
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+      if (!loaded) {
+        SplashScreen.hideAsync();
+      }
+    }, [loaded]);
 
-  if (!loaded) {
+  if (!loaded && !error) {
     return null;
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <GestureHandlerRootView>
+      <ThemeProvider>
+        <TodoListDataProvider>
+          <TodoProvider>
+            <Stack>
+              <Stack.Screen name="(screens)" options={{ headerShown: false }} />
+              <Stack.Screen name="todo" options={{ headerShown: false }} />
+            </Stack>
+          </TodoProvider>
+        </TodoListDataProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
+
   );
 }
