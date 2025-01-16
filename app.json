@@ -17,6 +17,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#1e1e1e"
       },
+      
       "package": "com.kennethb091.todoapp"
     },
     "web": {
@@ -32,9 +33,9 @@
           "backgroundColor": "#ffffff",
           "image": "./assets/images/splash-image.png",
           "dark": {
+            "image": "./assets/images/splash-image.png",
             "backgroundColor": "#1e1e1e"
-          },
-          "resizeMode": "cover"
+          }
         }
       ],
       "expo-font"
