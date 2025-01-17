@@ -9,6 +9,7 @@ import { todoList } from ".";
 import { Ttheme } from ".";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import DeleteModal from "@/components/DeleteModal";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function Archive() {
 
@@ -37,7 +38,7 @@ export default function Archive() {
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
 
-            <Link href={"/todo/TodoScreen"} asChild >
+            <Link href={"./TodoScreen"} asChild >
               <Pressable onPress={() => onPressed(item)}>
 
                 <Card styleProps={theme} item={item} setDeleteTodoId={setDeleteTodoId} setShowDeleteModal={setShowDeleteModal} showDeleteModal={showDeleteModal} />
@@ -48,16 +49,15 @@ export default function Archive() {
         />
       </Container>
 
-      <Modal
-        animationType='fade'
-        transparent={true}
-        visible={showDeleteModal}
+      <GestureHandlerRootView>
+        <Modal
+          animationType='fade'
+          transparent={true}
+          visible={showDeleteModal}
         >
-        <DeleteModal setShowDeleteModal={setShowDeleteModal} showDeleteModal={showDeleteModal} id={deleteTodoId} />
-      </Modal>
-
-      {/* {showDeleteModal && <DeleteModal setShowDeleteModal={setShowDeleteModal} showDeleteModal={showDeleteModal} id={deleteTodoId} />} */}
-
+          <DeleteModal setShowDeleteModal={setShowDeleteModal} showDeleteModal={showDeleteModal} id={deleteTodoId} />
+        </Modal>
+      </GestureHandlerRootView>
     </SafeAreaView>
   )
 }

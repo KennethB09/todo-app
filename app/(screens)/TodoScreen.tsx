@@ -1,7 +1,7 @@
 import { View, Text, Pressable, TouchableOpacity, Modal, StyleSheet, TextInput, Platform, ScrollView, Dimensions, StatusBar } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link } from "expo-router";
-import { Tlist, Ttheme } from "../(screens)";
+import { Tlist, Ttheme } from ".";
 import { useTodo } from "@/context/context";
 import { useState } from "react";
 import { useTodoListData } from "@/context/todoListContext";

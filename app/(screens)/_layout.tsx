@@ -26,7 +26,7 @@ export default function ScreenLayout() {
             drawerContent={(props) => {
                 return (
                     <View style={{ flex: 1, padding: 20 }}>
-                        <SafeAreaView>
+                        <SafeAreaView style={{ marginBottom: 20 }}>
                             <View style={{ marginBottom: 20 }}>
                                 <Text style={{ color: theme.pink, fontFamily: theme.fontFamily, fontSize: theme.fontSizeL, fontWeight: 500 }}>MENU</Text>
                             </View>
@@ -49,8 +49,7 @@ export default function ScreenLayout() {
                 headerTitleStyle: { color: theme.pink, fontSize: theme.fontSizeEX, fontFamily: theme.fontFamily, fontWeight: 500 },
                 drawerIcon: ({ color }) => (
                     <Ionicons name="list" size={30} color={theme.pink} />
-                ),
-
+                )
             }}
             />
             <Drawer.Screen name="Archive" options={{
@@ -63,6 +62,11 @@ export default function ScreenLayout() {
                 drawerIcon: ({ color }) => (
                     <Ionicons name="archive-outline" size={30} color={theme.pink} />
                 )
+            }}
+            />
+            <Drawer.Screen name="TodoScreen" options={{
+                headerShown: false,
+                drawerItemStyle: {display: 'none'}
             }}
             />
         </Drawer>

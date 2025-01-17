@@ -172,7 +172,7 @@ export default function HomeScreen() {
             </View>
           }
           renderItem={({ item }) => (
-            <Link href={"/todo/TodoScreen"} asChild>
+            <Link href={"./TodoScreen"} asChild>
               <Pressable onPress={() => onPressed(item)}>
                 <Card styleProps={theme} item={item} setDeleteTodoId={setDeleteTodoId} setShowDeleteModal={setShowDeleteModal} showDeleteModal={showDeleteModal} />
               </Pressable>
