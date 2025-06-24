@@ -1,60 +1,110 @@
 import React, { useReducer, createContext, Dispatch, ReactElement, ReactNode, SetStateAction, useContext } from "react";
-import { todoList, Tlist } from "@/app/(screens)";
+import { todo, task, UserData, notification } from "@/types/dataType";
 
-type TtodoDataAction =
-    | { type: "SET_DATA"; payload: todoList[] }
-    | { type: "UPDATE_DATA"; payload: todoList }
-    | { type: "CREATE_DATA"; payload: todoList }
-    | { type: "DELETE_DATA"; payload: number | string }
-    | { type: "ARCHIVE_DATA"; payload: { todo: number | string, type: "archive" | "todo" } }
+type TuserDataAction =
+    | { type: "SET_DATA"; payload: UserData }
+    | { type: "CHECK_TASK"; payload: string }
+    | { type: "ADD_TASK"; payload: task }
+    | { type: "EDIT_TASK"; payload: task }
+    | { type: "DELETE_TASK"; payload: string }
+    | { type: "CREATE_TODO"; payload: todo }
+    | { type: "UPDATE_TODO"; payload: todo }
+    | { type: "DELETE_TODO"; payload: string }
+    | { type: "ADD_NOTIFICATION"; payload: notification }
+    | { type: "DELETE_NOTIFICATION"; payload: notification }
 
-type TodoState = {
-    todoList: todoList[] | [];
+type TuserDataState = {
+    userData: UserData
 }
 
-type TtodoDataContext = {
-    todoList: todoList[] | [];
-    dispatch: Dispatch<TtodoDataAction>;
+type TuserDataContext = {
+    userData: UserData;
+    dispatch: Dispatch<TuserDataAction>;
 }
 
-const todoListContext = createContext<TtodoDataContext | undefined>(undefined);
+const todoListContext = createContext<TuserDataContext | undefined>(undefined);
 
-const todoListReducer = (state: TodoState, action: TtodoDataAction): TodoState => {
+const todoListReducer = (state: TuserDataState, action: TuserDataAction): TuserDataState => {
     switch (action.type) {
         case "SET_DATA":
             return {
-                todoList: action.payload
+                userData: action.payload
             }
-        case "UPDATE_DATA":
+        case "CHECK_TASK":
             return {
-                todoList: state.todoList?.map(e => 
-                    e.id === action.payload.id
-                        ? e = action.payload
-                        : e
-                ) || null
+                userData: {
+                    ...state.userData,
+                    tasks: state.userData.tasks.map(task => 
+                        task.id === action.payload ? { ...task, isChecked: !task.isChecked } : task
+                    )
+                }
             }
-        case "CREATE_DATA":
+        case "ADD_TASK":
             return {
-                todoList: [action.payload, ...state.todoList!]
+                userData: {
+                    ...state.userData,
+                    tasks: [action.payload, ...state.userData.tasks]
+                }
             }
-        case "DELETE_DATA":
+        case "EDIT_TASK":
             return {
-                todoList: state.todoList?.filter(e => e.id !== action.payload)
+                userData: {
+                    ...state.userData,
+                    tasks: state.userData.tasks.map(task => 
+                        task.id === action.payload.id ? action.payload : task
+                    )
+                }
             }
-        case "ARCHIVE_DATA":
+        case "DELETE_TASK":
             return {
-                todoList: state.todoList?.map(e => 
-                    e.id === action.payload.todo
-                        ? { ...e, type: action.payload.type }
-                        : e
-                ) || null
+                userData: {
+                    ...state.userData,
+                    tasks: state.userData.tasks.filter(task => task.id !== action.payload)
+                }
+            }
+        case "CREATE_TODO":
+            return {
+                userData: {
+                    ...state.userData,
+                    todos: [action.payload, ...state.userData.todos]
+                }
+            }
+        case "UPDATE_TODO":
+            return {
+                userData: {
+                    ...state.userData,
+                    todos: state.userData.todos.map(todo => 
+                        todo.id === action.payload.id ? action.payload : todo
+                    )
+                }
+            }
+        case "DELETE_TODO":
+            return {
+                userData: {
+                    ...state.userData,
+                    todos: state.userData.todos.filter(e => e.id !== action.payload)
+                }
+            }
+        case "ADD_NOTIFICATION":
+            return {
+                userData: {
+                    ...state.userData,
+                    notifications: [action.payload, ...state.userData.notifications]
+                }
+            }
+        case "DELETE_NOTIFICATION":
+            return {
+                userData: {
+                    ...state.userData,
+                    notifications: state.userData.notifications.filter(n => n.id !== action.payload.id)
+                }
             }
         default:
             return state;
     }
 }
 
-function useTodoListData(): TtodoDataContext {
+function useTodoListData(): TuserDataContext {
     const context = useContext(todoListContext);
     if (!context) {
         throw new Error("todoContext must be used within an todoProvider.");
@@ -64,7 +114,11 @@ function useTodoListData(): TtodoDataContext {
 
 const TodoListDataProvider = ({ children }: { children: ReactNode }): ReactElement => {
     const [state, dispatch] = useReducer(todoListReducer, {
-        todoList: []
+        userData: {
+            todos: [],
+            tasks: [],
+            notifications: []
+        }
     });
 
     return (

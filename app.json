@@ -17,7 +17,6 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#1e1e1e"
       },
-      
       "package": "com.kennethb091.todoapp"
     },
     "web": {

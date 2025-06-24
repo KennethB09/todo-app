@@ -1,9 +1,9 @@
 import React, { createContext, Dispatch, ReactElement, ReactNode, SetStateAction, useContext, useState } from "react";
-import { todoList } from "@/app/(screens)";
+import { todo } from "@/types/dataType";
 
 type todoData = {
-    data: todoList | null
-    setData: Dispatch<SetStateAction<todoList | null>>
+    data: todo | null
+    setData: Dispatch<SetStateAction<todo | null>>
 }
 
 const todoContext = createContext<todoData | undefined>(undefined);
@@ -19,7 +19,7 @@ function useTodo(): todoData {
 }
 
 const TodoProvider = ({children}: { children: ReactNode }): ReactElement => {
-    const [data, setData] = useState<todoList | null>(null);
+    const [data, setData] = useState<todo | null>(null);
 
     return (
     <todoContext.Provider value={{ data, setData }}>

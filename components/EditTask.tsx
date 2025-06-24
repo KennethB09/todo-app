@@ -20,14 +20,14 @@ import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useThemeContext } from "@/context/ThemeContext";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import RadioButton from "./RadioButton";
+import * as Notifications from "expo-notifications";
+import { schedulePushNotification } from "@/utils/handle-local-notification";
 import Checkbox from "expo-checkbox";
 import { useTodo } from "@/context/context";
 import { useTodoListData } from "@/context/todoListContext";
-import * as Notifications from "expo-notifications";
-import { schedulePushNotification } from "@/utils/handle-local-notification";
 
 type modalProps = {
+  task: task | undefined;
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -38,35 +38,57 @@ type Tcheckbox = {
   value: day;
 };
 
-const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
-  const [name, setName] = useState("");
-  const [radioValue, setRadioValue] = useState<"simple" | "scheduled">(
-    "simple"
-  );
-  const [isDueDateEnabled, setIsDueDateEnabled] = useState(true);
-  const [dueDate, setDueDate] = useState<Date>(new Date());
-  const [isCompletionTimeEnabled, setIsCompletionTimeEnabled] = useState(true);
-  const [completionTimeStart, setCompletionTimeStart] = useState<Date>(
-    new Date()
-  );
-  const [completionTimeEnd, setCompletionTimeEnd] = useState<Date>(new Date());
-  const [isReminderEnabled, setIsReminderEnabled] = useState(true);
-  const [reminder, setReminder] = useState<number>(15);
-  const [checkboxValues, setCheckboxValues] = useState<day[]>([]);
-  const [checkbox, setCheckbox] = useState<Tcheckbox[]>([
-    { label: "Sun", checked: false, value: 1 },
-    { label: "Mon", checked: false, value: 2 },
-    { label: "Tue", checked: false, value: 3 },
-    { label: "Wed", checked: false, value: 4 },
-    { label: "Thu", checked: false, value: 5 },
-    { label: "Fri", checked: false, value: 6 },
-    { label: "Sat", checked: false, value: 7 },
-  ]);
+const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
   const [mode, setMode] = useState<"date" | "time">("date");
   const { theme, colorScheme, colorTheme } = useThemeContext();
   const checkPlatform = Platform.OS === "android";
   const { data } = useTodo();
   const { dispatch, userData } = useTodoListData();
+
+  function getCheckboxArray(selectedDays: day[] | undefined): Tcheckbox[] {
+    const allDays: Tcheckbox[] = [
+      { label: "Sun", checked: false, value: 1 },
+      { label: "Mon", checked: false, value: 2 },
+      { label: "Tue", checked: false, value: 3 },
+      { label: "Wed", checked: false, value: 4 },
+      { label: "Thu", checked: false, value: 5 },
+      { label: "Fri", checked: false, value: 6 },
+      { label: "Sat", checked: false, value: 7 },
+    ];
+    if (!selectedDays) return allDays;
+    return allDays.map((item) => ({
+      ...item,
+      checked: selectedDays.includes(item.value),
+    }));
+  }
+
+  const radioValue: "simple" | "scheduled" = task?.taskType ?? "simple";
+  const [name, setName] = useState(task?.name ?? "");
+  const [isDueDateEnabled, setIsDueDateEnabled] = useState(
+    task?.dueDate?.enabled ?? false
+  );
+  const [dueDate, setDueDate] = useState<Date | undefined>(task?.dueDate?.date);
+  const [isCompletionTimeEnabled, setIsCompletionTimeEnabled] = useState(
+    task?.completionTime?.enabled ?? false
+  );
+  const [completionTimeStart, setCompletionTimeStart] = useState<
+    Date | undefined
+  >(task?.completionTime?.start);
+  const [completionTimeEnd, setCompletionTimeEnd] = useState<Date | undefined>(
+    task?.completionTime?.end
+  );
+  const [isReminderEnabled, setIsReminderEnabled] = useState(
+    task?.reminder?.enabled ?? false
+  );
+  const [reminder, setReminder] = useState<number | undefined>(
+    task?.reminder?.remind
+  );
+  const [checkboxValues, setCheckboxValues] = useState<day[] | undefined>(
+    task?.repeat
+  );
+  const [checkbox, setCheckbox] = useState<Tcheckbox[]>(
+    getCheckboxArray(task?.repeat)
+  );
 
   const onChange = (
     event: DateTimePickerEvent,
@@ -90,21 +112,21 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
   ) => {
     if (currentMode === "due_date") {
       DateTimePickerAndroid.open({
-        value: dueDate,
+        value: dueDate!,
         onChange,
         mode: "date",
         is24Hour: true,
       });
     } else if (currentMode === "start_time") {
       DateTimePickerAndroid.open({
-        value: dueDate,
+        value: dueDate!,
         onChange,
         mode: "time",
         is24Hour: true,
       });
     } else if (currentMode === "end_time") {
       DateTimePickerAndroid.open({
-        value: dueDate,
+        value: dueDate!,
         onChange: onChangeEnd,
         mode: "time",
         is24Hour: true,
@@ -129,54 +151,42 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
     }
   }
 
-  function generateRandomId(length = 16) {
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let randomId = "";
-    for (let i = 0; i < length; i++) {
-      randomId += characters.charAt(
-        Math.floor(Math.random() * characters.length)
-      );
-    }
-    return randomId;
-  }
-
   async function saveTask() {
-    const id = generateRandomId(16);
-    let task: task;
+    const id = task!.id;
+    let edit_task: task;
     if (radioValue === "scheduled") {
-      task = {
-        todoId: data!.id,
-        id,
-        name,
-        isChecked: false,
-        taskType: radioValue,
+      edit_task = {
+        todoId: task!.todoId,
+        id: task!.id,
+        name: name,
+        isChecked: task!.isChecked,
+        taskType: task!.taskType,
         dueDate: {
-          enabled: isDueDateEnabled,
-          date: dueDate,
+          enabled: isDueDateEnabled!,
+          date: dueDate!,
         },
         repeat: checkboxValues,
         completionTime: {
-          enabled: isCompletionTimeEnabled,
-          start: completionTimeStart,
-          end: completionTimeEnd,
+          enabled: isCompletionTimeEnabled!,
+          start: completionTimeStart!,
+          end: completionTimeEnd!,
         },
         reminder: {
-          enabled: isReminderEnabled,
-          remind: reminder,
+          enabled: isReminderEnabled!,
+          remind: reminder!,
         },
       };
     } else {
-      task = {
-        todoId: data!.id,
-        id,
-        name,
-        isChecked: false,
-        taskType: radioValue,
+      edit_task = {
+        todoId: task!.todoId,
+        id: task!.id,
+        name: name,
+        isChecked: task!.isChecked,
+        taskType: task!.taskType,
       };
     }
 
-    dispatch({ type: "ADD_TASK", payload: task });
+    dispatch({ type: "EDIT_TASK", payload: edit_task });
     setName("");
     setIsOpen(!isOpen);
 
@@ -191,13 +201,13 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
 
       await schedulePushNotification(
         isDueDateEnabled,
-        new Date(dueDate),
+        new Date(dueDate!),
         isReminderEnabled,
-        reminder,
+        reminder!,
         name,
-        checkboxValues,
+        checkboxValues!,
         isCompletionTimeEnabled,
-        completionTimeStart
+        completionTimeStart!
       );
     }
   }
@@ -237,16 +247,6 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
             onChangeText={(t) => setName(t)}
             value={name}
             autoFocus
-          />
-        </View>
-        <View style={styles.radioContainer}>
-          <RadioButton
-            options={[
-              { label: "simple", value: "simple" },
-              { label: "scheduled", value: "scheduled" },
-            ]}
-            value={radioValue}
-            onChange={setRadioValue}
           />
         </View>
 
@@ -289,7 +289,7 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
                         : styles.textInputDisable
                     }
                   >
-                    {formatTime(dueDate, "MM/dd/yyyy")}
+                    {formatTime(dueDate!, "MM/dd/yyyy")}
                   </Text>
                 </Pressable>
               ) : (
@@ -298,7 +298,7 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
                   style={styles.datePicker}
                   themeVariant={colorScheme === "dark" ? "dark" : "light"}
                   testID="dateTimePicker"
-                  value={dueDate}
+                  value={dueDate!}
                   mode={mode}
                   is24Hour={true}
                   onChange={onChange}
@@ -328,13 +328,13 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
                         const update = [...checkbox];
 
                         if (update[index].checked) {
-                          const remove = checkboxValues.filter(
+                          const remove = checkboxValues!.filter(
                             (day) => day !== update[index].value
                           );
                           setCheckboxValues(remove);
                         } else {
                           setCheckboxValues((prev) => [
-                            ...prev,
+                            ...prev!,
                             update[index].value,
                           ]);
                         }
@@ -388,7 +388,7 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
                             : styles.setTimeTextDisable
                         }
                       >
-                        {formatTime(dueDate, "HH:mm:ss")}
+                        {formatTime(dueDate!, "HH:mm:ss")}
                       </Text>
                     </Pressable>
                   ) : (
@@ -397,7 +397,7 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
                       style={styles.datePicker}
                       themeVariant={colorScheme === "dark" ? "dark" : "light"}
                       testID="dateTimePicker"
-                      value={dueDate}
+                      value={dueDate!}
                       mode={"time"}
                       is24Hour={true}
                       onChange={onChange}
@@ -527,7 +527,7 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
   );
 };
 
-export default AddModal;
+export default EditTask;
 
 function createStyles(
   theme: Ttheme,
