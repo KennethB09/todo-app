@@ -67,7 +67,9 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
   const [isDueDateEnabled, setIsDueDateEnabled] = useState(
     task?.dueDate?.enabled ?? false
   );
-  const [dueDate, setDueDate] = useState<Date | undefined>(task?.dueDate?.date);
+  const [dueDate, setDueDate] = useState<Date | undefined>(
+    task?.dueDate?.date ? new Date(task.dueDate.date) : undefined
+  );
   const [isCompletionTimeEnabled, setIsCompletionTimeEnabled] = useState(
     task?.completionTime?.enabled ?? false
   );
@@ -224,7 +226,6 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
   }
 
   const windowL = Dimensions.get("window").width;
-  const windowH = Dimensions.get("window").height;
   const styles = createStyles(theme, colorScheme, windowL, colorTheme);
 
   return (

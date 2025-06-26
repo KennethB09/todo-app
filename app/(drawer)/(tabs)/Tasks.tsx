@@ -1,12 +1,24 @@
-import { View, Text } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
 import React from 'react'
+import { Ttheme } from '@/types/dataType';
+import { useThemeContext } from '@/context/ThemeContext';
 
-const Tasks = () => {
+export default function Task() {
+  const { theme, colorTheme } = useThemeContext();
+  const styles = createStyle(theme, colorTheme);
   return (
-    <View>
-      <Text>Tasks defbuebfu</Text>
+    <View style={styles.mainContainer}>
+
     </View>
   )
 }
 
-export default Tasks
+function createStyle(theme: Ttheme, colorTheme: string) {
+  return StyleSheet.create({
+    mainContainer: {
+      height: "100%",
+      width: "100%",
+      backgroundColor: theme.background
+    }
+  })
+}

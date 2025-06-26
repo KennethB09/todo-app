@@ -14,18 +14,25 @@ type ListProps = {
   item: task;
   toggleList: (id: string) => void;
   toggleEditModal: (task: task) => void;
-  onDeleteList: React.Dispatch<React.SetStateAction<string>>;
+  setDeleteId: React.Dispatch<React.SetStateAction<string>>;
+  setShowDeleteModal: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function Task({
   item,
   toggleList,
   toggleEditModal,
-  onDeleteList,
+  setDeleteId,
+  setShowDeleteModal,
 }: ListProps) {
   const { theme, colorScheme } = useThemeContext();
   const styles = createStyles(theme, colorScheme);
   const { data } = useTodo();
+
+  function onDelete(id: string) {
+    setDeleteId(id);
+    setShowDeleteModal((prev) => !prev);
+  }
 
   function formatTime(date: Date, type: "MM/dd/yyyy" | "HH:mm:ss") {
     let formattedTime: string;
@@ -55,7 +62,7 @@ export default function Task({
     .onEnd(() => {
       translateX.value = withTiming(0, undefined, (isFinished) => {
         if (isFinished && translateXValid.value < -80) {
-          runOnJS(onDeleteList)(item.id);
+          runOnJS(onDelete)(item.id);
           translateXValid.value = 0;
         }
         translateXValid.value = 0;
@@ -150,10 +157,15 @@ export default function Task({
                     size={15}
                   />
                   <Text style={styles.listInfo}>
-                    {`${formatTime(
-                      item.completionTime?.start!,
-                      "HH:mm:ss"
-                    )} - ${formatTime(item.completionTime?.end!, "HH:mm:ss")}`}
+                    {item.completionTime?.enabled
+                      ? `${formatTime(
+                          item.completionTime?.start!,
+                          "HH:mm:ss"
+                        )} - ${formatTime(
+                          item.completionTime?.end!,
+                          "HH:mm:ss"
+                        )}`
+                      : "Not set"}
                   </Text>
                 </View>
               </View>

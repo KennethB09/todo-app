@@ -177,7 +177,8 @@ function TodoScreen() {
           renderItem={({ item }) => (
             <Task
               item={item}
-              onDeleteList={setDeleteTaskId}
+              setDeleteId={setDeleteTaskId}
+              setShowDeleteModal={setDeleteModal}
               toggleList={toggleList}
               toggleEditModal={toggleEditModal}
             />

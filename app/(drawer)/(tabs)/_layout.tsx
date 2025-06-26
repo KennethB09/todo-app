@@ -8,6 +8,9 @@ import { useTodoListData } from "@/context/todoListContext";
 import { useTodo } from "@/context/context";
 import { StyleSheet, View } from "react-native";
 import { todo } from "@/types/dataType";
+import * as SystemUI from 'expo-system-ui';
+
+SystemUI.setBackgroundColorAsync("red"); 
 
 export default function TabLayout() {
   const { colorTheme, theme, colorScheme } = useThemeContext();
@@ -102,7 +105,8 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="home-outline" color={color} size={28} />
           ),
-          animation: "shift"
+          animation: "shift",
+          sceneStyle: { backgroundColor: theme.background },
         }}
       />
       <Tabs.Screen
@@ -118,11 +122,13 @@ export default function TabLayout() {
           },
           headerStyle: {
             shadowColor: "transparent",
+            backgroundColor: theme.background,
           },
           tabBarIcon: ({ color }) => (
             <Ionicons name="list" color={color} size={28} />
           ),
-          animation: "shift"
+          animation: "shift",
+          sceneStyle: { backgroundColor: theme.background },
         }}
       />
       <Tabs.Screen
@@ -152,11 +158,13 @@ export default function TabLayout() {
           },
           headerStyle: {
             shadowColor: "transparent",
+            backgroundColor: theme.background,
           },
           tabBarIcon: ({ color }) => (
             <Ionicons name="calendar-outline" color={color} size={28} />
           ),
-          animation: "shift"
+          animation: "shift",
+          sceneStyle: { backgroundColor: theme.background },
         }}
       />
       <Tabs.Screen
@@ -172,11 +180,13 @@ export default function TabLayout() {
           },
           headerStyle: {
             shadowColor: "transparent",
+            backgroundColor: theme.background,
           },
           tabBarIcon: ({ color }) => (
             <Ionicons name="notifications-outline" color={color} size={28} />
           ),
-          animation: "shift"
+          animation: "shift",
+          sceneStyle: { backgroundColor: theme.background },
         }}
       />
     </Tabs>

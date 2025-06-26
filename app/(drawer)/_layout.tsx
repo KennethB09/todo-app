@@ -1,7 +1,6 @@
 import { Drawer } from "expo-router/drawer";
 import {
   View,
-  Pressable,
   Text,
   Platform,
   Image,
@@ -107,6 +106,7 @@ export default function ScreenLayout() {
           drawerLabelStyle: {
             fontSize: theme.fontSizeML,
           },
+          sceneStyle: { backgroundColor: theme.background }
         }}
       />
     </Drawer>

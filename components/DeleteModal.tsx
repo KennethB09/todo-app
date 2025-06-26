@@ -114,7 +114,7 @@ function createStyles(theme: Ttheme, colorScheme: string | null | undefined, win
       width: 100,
     },
     modalTextTitle: {
-      color: theme.pink,
+      color: colorTheme,
       fontSize: theme.fontSizeML,
       fontWeight: 500,
       fontFamily: theme.fontFamily,

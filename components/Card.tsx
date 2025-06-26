@@ -29,7 +29,7 @@ function Card({
   setShowDeleteModal,
   showDeleteModal,
 }: TCardProps) {
-  const { dispatch, userData } = useTodoListData();
+  const { userData } = useTodoListData();
 
   const countCompletedTasks = userData.tasks.filter(
     (t) => t.todoId === item.id && t.isChecked
@@ -73,8 +73,12 @@ function Card({
 
   const translateX = useSharedValue(0);
   const translateXValid = useSharedValue(0);
+  const deleteIndicator = useSharedValue<0 | 1>(0);
 
   const panGesture = Gesture.Pan()
+    .onStart(() => {
+      deleteIndicator.value = 1;
+    })
     .onUpdate((event) => {
       translateX.value = event.translationX;
       translateXValid.value = event.translationX;
@@ -93,11 +97,15 @@ function Card({
           translateXValid.value = 0;
         }
         translateXValid.value = 0;
+        deleteIndicator.value = 0;
       });
-    });
+    })
+    .activateAfterLongPress(150);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
+    borderColor: "red",
+    borderWidth: deleteIndicator.value,
   }));
 
   const iconTrashContainerOpacity = useAnimatedStyle(() => {
@@ -130,7 +138,6 @@ function Card({
         >
           <Ionicons name="trash-outline" color={"red"} size={30} />
         </Animated.View>
-
       </View>
 
       <GestureDetector gesture={panGesture}>
@@ -144,7 +151,6 @@ function Card({
           </View>
         </Animated.View>
       </GestureDetector>
-
     </View>
   );
 }

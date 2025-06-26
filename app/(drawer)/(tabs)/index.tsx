@@ -2,13 +2,13 @@ import {
   Text,
   View,
   StyleSheet,
-  TouchableOpacity,
   Platform,
   ScrollView,
   SafeAreaView,
   StatusBar,
   Pressable,
   Modal,
+  Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
 import Card from "@/components/Card";
@@ -17,12 +17,25 @@ import { useTodo } from "@/context/context";
 import { useTodoListData } from "@/context/todoListContext";
 import { format } from "date-fns";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
 import { useThemeContext } from "@/context/ThemeContext";
-import Animated, { LinearTransition } from "react-native-reanimated";
+import Animated, {
+  LinearTransition,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  runOnJS,
+} from "react-native-reanimated";
 import DeleteModal from "@/components/DeleteModal";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  GestureHandlerRootView,
+  GestureDetector,
+  Gesture,
+} from "react-native-gesture-handler";
 import { task, Ttheme, todo, UserData, day } from "@/types/dataType";
+
+const SCREEN_HEIGHT = Dimensions.get("window").height;
+const MAX_TRANSLATE_Y = -SCREEN_HEIGHT * 0.4;
+const SNAP_THRESHOLD = -SCREEN_HEIGHT * 0.3;
 
 export default function HomeScreen() {
   const { setData } = useTodo();
@@ -31,9 +44,55 @@ export default function HomeScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTodoId, setDeleteTodoId] = useState<string>("");
   const router = useRouter();
-
-  const Container = Platform.OS === "web" ? ScrollView : SafeAreaView;
+  const Container = Platform.OS === "web" ? ScrollView : Animated.View;
   const styles = createStyles(theme, colorScheme);
+  const [isExpand, setIsExpand] = useState(false);
+  const translateY = useSharedValue(0);
+  const prevTranslationY = useSharedValue(0);
+
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      prevTranslationY.value = translateY.value;
+    })
+    .onUpdate((event) => {
+      if (prevTranslationY.value < SNAP_THRESHOLD) {
+        translateY.value = prevTranslationY.value + event.translationY;
+      } else {
+        if (event.translationY > 0) {
+          translateY.value = 0;
+        } else {
+          const newY = event.translationY;
+          translateY.value = Math.max(MAX_TRANSLATE_Y, newY);
+        }
+      }
+    })
+    .onEnd(() => {
+      if (translateY.value < SNAP_THRESHOLD) {
+        // Snap to full screen
+        translateY.value = withSpring(MAX_TRANSLATE_Y, { damping: 20 });
+        runOnJS(setIsExpand)(true);
+      } else {
+        // Return to original position
+        translateY.value = withSpring(0, { damping: 20 });
+        runOnJS(setIsExpand)(false);
+      }
+    });
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: translateY.value }]
+    };
+  });
+
+  function handleSeeAllPress() {
+    if (translateY.value === MAX_TRANSLATE_Y) {
+      translateY.value = withSpring(0, { damping: 20 });
+      setIsExpand(false);
+    } else {
+      translateY.value = withSpring(MAX_TRANSLATE_Y, { damping: 20 });
+      setIsExpand(true);
+    }
+  }
 
   // Boilerplate data to use if no data is found in AsyncStorage
   const boilerData: UserData = {
@@ -178,18 +237,27 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <Container>
-        <View style={styles.todosListHeader}>
-          <Text style={styles.todosListHeaderTitle}>Todo's</Text>
-          <Pressable>
-            <Text style={styles.todosHeaderBtn}>See All</Text>
-          </Pressable>
-        </View>
+      <Container
+        style={[
+          animatedStyle,
+          { backgroundColor: theme.background, zIndex: 10 },
+        ]}
+      >
+        <GestureDetector gesture={panGesture}>
+          <View style={styles.todosListHeader}>
+            <Text style={styles.todosListHeaderTitle}>Todo's</Text>
+            <Pressable onPress={handleSeeAllPress}>
+              <Text style={styles.todosHeaderBtn}>
+                {isExpand ? "Collapse" : "See All"}
+              </Text>
+            </Pressable>
+          </View>
+        </GestureDetector>
         <Animated.FlatList
           contentContainerStyle={styles.contentContainer}
           data={todoList}
           itemLayoutAnimation={LinearTransition}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.id}
           ListEmptyComponent={
             <View
               style={{
@@ -318,7 +386,8 @@ function createStyles(theme: Ttheme, colorScheme: string | null | undefined) {
     },
     contentContainer: {
       gap: 10,
-      height: "75%",
+      height: "auto", //"75%",
+      paddingBottom: 120,
     },
     cardCountContainer: {
       width: "100%",
@@ -339,7 +408,7 @@ function createStyles(theme: Ttheme, colorScheme: string | null | undefined) {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      paddingHorizontal: 10,
+      paddingHorizontal: 15,
       marginVertical: 10,
     },
     todosListHeaderTitle: {
