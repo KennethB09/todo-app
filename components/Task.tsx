@@ -7,15 +7,17 @@ import { useThemeContext } from "@/context/ThemeContext";
 import { Ttheme, task } from "@/types/dataType";
 import { Ionicons } from "@expo/vector-icons";
 import { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
-import { useTodo } from "@/context/context";
 import { format } from "date-fns";
+import { useTodoListData } from "@/context/todoListContext";
 
 type ListProps = {
   item: task;
   toggleList: (id: string) => void;
-  toggleEditModal: (task: task) => void;
-  setDeleteId: React.Dispatch<React.SetStateAction<string>>;
-  setShowDeleteModal: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleEditModal?: (task: task) => void;
+  setDeleteId?: React.Dispatch<React.SetStateAction<string>>;
+  setShowDeleteModal?: React.Dispatch<React.SetStateAction<boolean>>;
+  enablePanGesture: boolean;
+  showFromTodo: boolean;
 };
 
 export default function Task({
@@ -24,14 +26,20 @@ export default function Task({
   toggleEditModal,
   setDeleteId,
   setShowDeleteModal,
+  enablePanGesture,
+  showFromTodo,
 }: ListProps) {
   const { theme, colorScheme } = useThemeContext();
   const styles = createStyles(theme, colorScheme);
-  const { data } = useTodo();
+  const { userData } = useTodoListData();
+
+  const todo = userData.todos.filter(todo => todo.id === item.todoId);
 
   function onDelete(id: string) {
-    setDeleteId(id);
-    setShowDeleteModal((prev) => !prev);
+    if (setDeleteId && setShowDeleteModal) {
+      setDeleteId(id);
+      setShowDeleteModal((prev) => !prev);
+    }
   }
 
   function formatTime(date: Date, type: "MM/dd/yyyy" | "HH:mm:ss") {
@@ -67,7 +75,8 @@ export default function Task({
         }
         translateXValid.value = 0;
       });
-    });
+    })
+    .enabled(enablePanGesture);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -124,52 +133,68 @@ export default function Task({
             <Checkbox
               value={item.isChecked}
               onValueChange={() => toggleList(item.id)}
-              color={data?.bg}
+              color={todo[0].bg}
             />
           </View>
-          <View style={{ flex: 1, gap: 5 }}>
+          <View style={{ flex: 1 }}>
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               <Text style={styles.listTitle}>{item.name}</Text>
-              <TouchableOpacity onPress={() => toggleEditModal(item)}>
-                <Ionicons name="create-outline" color={data?.bg} size={25} />
-              </TouchableOpacity>
+              {toggleEditModal && (
+                <TouchableOpacity onPress={() => toggleEditModal(item)}>
+                  <Ionicons name="create-outline" color={todo[0].bg} size={25} />
+                </TouchableOpacity>
+              )}
             </View>
-            {item.taskType === "scheduled" && (
-              <View style={{ flexDirection: "row", gap: 30 }}>
-                <View style={{ flexDirection: "row", gap: 10, width: "35%" }}>
-                  <Ionicons
-                    name="calendar-outline"
-                    style={{ color: data?.bg }}
-                    size={15}
-                  />
-                  <Text style={styles.listInfo}>
-                    {item.dueDate?.enabled
-                      ? formatTime(item.dueDate.date, "MM/dd/yyyy")
-                      : getSortedRepeatDays(item.repeat)}
-                  </Text>
+            <View style={{ gap: 5 }}>
+              {showFromTodo && (
+                <Text
+                  style={{
+                    fontFamily: theme.fontFamily,
+                    color: theme.fontColor.secondary,
+                    fontSize: theme.fontSizeS,
+                    fontWeight: "regular",
+                  }}
+                >
+                  From: {todo[0].title}
+                </Text>
+              )}
+              {item.taskType === "scheduled" && (
+                <View style={{ flexDirection: "row", gap: 30 }}>
+                  <View style={{ flexDirection: "row", gap: 10, width: "35%" }}>
+                    <Ionicons
+                      name="calendar-outline"
+                      style={{ color: todo[0].bg }}
+                      size={15}
+                    />
+                    <Text style={styles.listInfo}>
+                      {item.dueDate?.enabled
+                        ? formatTime(item.dueDate.date, "MM/dd/yyyy")
+                        : getSortedRepeatDays(item.repeat)}
+                    </Text>
+                  </View>
+                  <View style={{ flexDirection: "row", gap: 10, width: "35%" }}>
+                    <Ionicons
+                      name="time-outline"
+                      style={{ color: todo[0].bg }}
+                      size={15}
+                    />
+                    <Text style={styles.listInfo}>
+                      {item.completionTime?.enabled
+                        ? `${formatTime(
+                            item.completionTime?.start!,
+                            "HH:mm:ss"
+                          )} - ${formatTime(
+                            item.completionTime?.end!,
+                            "HH:mm:ss"
+                          )}`
+                        : "Not set"}
+                    </Text>
+                  </View>
                 </View>
-                <View style={{ flexDirection: "row", gap: 10, width: "35%" }}>
-                  <Ionicons
-                    name="time-outline"
-                    style={{ color: data?.bg }}
-                    size={15}
-                  />
-                  <Text style={styles.listInfo}>
-                    {item.completionTime?.enabled
-                      ? `${formatTime(
-                          item.completionTime?.start!,
-                          "HH:mm:ss"
-                        )} - ${formatTime(
-                          item.completionTime?.end!,
-                          "HH:mm:ss"
-                        )}`
-                      : "Not set"}
-                  </Text>
-                </View>
-              </View>
-            )}
+              )}
+            </View>
           </View>
         </Animated.View>
       </GestureDetector>

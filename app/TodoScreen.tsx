@@ -181,6 +181,8 @@ function TodoScreen() {
               setShowDeleteModal={setDeleteModal}
               toggleList={toggleList}
               toggleEditModal={toggleEditModal}
+              enablePanGesture={true}
+              showFromTodo={false}
             />
           )}
         />

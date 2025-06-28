@@ -31,7 +31,7 @@ import {
   GestureDetector,
   Gesture,
 } from "react-native-gesture-handler";
-import { task, Ttheme, todo, UserData, day } from "@/types/dataType";
+import { task, Ttheme, todo, UserData } from "@/types/dataType";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MAX_TRANSLATE_Y = -SCREEN_HEIGHT * 0.4;
@@ -80,7 +80,7 @@ export default function HomeScreen() {
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ translateY: translateY.value }]
+      transform: [{ translateY: translateY.value }],
     };
   });
 
@@ -136,7 +136,7 @@ export default function HomeScreen() {
 
   function onPressed(item: todo) {
     setData(item);
-    router.push("/TodoScreen");
+    router.navigate("/TodoScreen");
   }
 
   function filterTasksForToday(tasks: task[], today = new Date()) {
@@ -145,24 +145,22 @@ export default function HomeScreen() {
       .toLowerCase();
 
     const convertDayToNumber = () => {
-      let day: day;
-      if (todayDay === "monday") {
-        day = 2;
-      } else if (todayDay === "tuesday") {
-        day = 3;
-      } else if (todayDay === "wednesday") {
-        day = 4;
-      } else if (todayDay === "thursday") {
-        day = 5;
-      } else if (todayDay === "friday") {
-        day = 6;
-      } else if (todayDay === "saturday") {
-        day = 7;
-      } else {
-        day = 1;
+      switch (todayDay) {
+        case "monday":
+          return 2;
+        case "tuesday":
+          return 3;
+        case "wednesday":
+          return 4;
+        case "thursday":
+          return 5;
+        case "friday":
+          return 6;
+        case "saturday":
+          return 7;
+        default:
+          return 1;
       }
-
-      return day;
     };
 
     const dueDateTask = tasks.filter(
@@ -180,12 +178,9 @@ export default function HomeScreen() {
     const simpleTask = tasks.filter((t) => t.taskType === "simple");
 
     return [...dueDateTask, ...repeatTask, ...simpleTask];
-  }
+  };
 
   function filterTasksForThisMonth(tasks: task[], today = new Date()) {
-    const todayMonth = today.getMonth();
-    const todayYear = today.getFullYear();
-
     const dueDateTask = tasks.filter(
       (t) =>
         t.taskType === "scheduled" &&
@@ -198,7 +193,7 @@ export default function HomeScreen() {
     const simpleTask = tasks.filter((t) => t.taskType === "simple");
 
     return [...dueDateTask, ...repeatTask, ...simpleTask];
-  }
+  };
 
   const todayTasks = filterTasksForToday(userData.tasks).length;
   const monthTasks = filterTasksForThisMonth(userData.tasks).length;

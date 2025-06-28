@@ -8,9 +8,6 @@ import { useTodoListData } from "@/context/todoListContext";
 import { useTodo } from "@/context/context";
 import { StyleSheet, View } from "react-native";
 import { todo } from "@/types/dataType";
-import * as SystemUI from 'expo-system-ui';
-
-SystemUI.setBackgroundColorAsync("red"); 
 
 export default function TabLayout() {
   const { colorTheme, theme, colorScheme } = useThemeContext();
