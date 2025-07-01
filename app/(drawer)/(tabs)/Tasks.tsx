@@ -2,9 +2,20 @@ import { View, Text, StyleSheet, SectionList } from "react-native";
 import React from "react";
 import { useThemeContext } from "@/context/ThemeContext";
 import { useTodoListData } from "@/context/todoListContext";
-import { task, Ttheme, todo } from "@/types/dataType";
+import { task, Ttheme, todo, day } from "@/types/dataType";
 import { format } from "date-fns";
 import TaskComponent from "@/components/task_card/Task";
+
+type TconvertDay = {
+  [key: string]: day;
+  sunday: day;
+  monday: day;
+  tuesday: day;
+  wednesday: day;
+  thursday: day;
+  friday: day;
+  saturday: day;
+}
 
 export default function Task() {
   const { userData } = useTodoListData();
@@ -14,23 +25,14 @@ export default function Task() {
     [theme, colorTheme]
   );
 
-  const convertDayToNumber = (day: string) => {
-    switch (day) {
-      case "monday":
-        return 2;
-      case "tuesday":
-        return 3;
-      case "wednesday":
-        return 4;
-      case "thursday":
-        return 5;
-      case "friday":
-        return 6;
-      case "saturday":
-        return 7;
-      default:
-        return 1;
-    }
+  const CONVERT_DAYS: TconvertDay = {
+    sunday: 1,
+    monday: 2,
+    tuesday: 3,
+    wednesday: 4,
+    thursday: 5,
+    friday: 6,
+    saturday: 7
   };
 
   function filterTasksForToday(tasks: task[], today = new Date()) {
@@ -48,7 +50,7 @@ export default function Task() {
       (t) =>
         t.taskType === "scheduled" &&
         !t.dueDate?.enabled &&
-        t.repeat?.includes(convertDayToNumber(todayDay))
+        t.repeat?.includes(CONVERT_DAYS[todayDay])
     );
     const simpleTask = tasks.filter((t) => t.taskType === "simple");
 
@@ -75,7 +77,7 @@ export default function Task() {
       (t) =>
         t.taskType === "scheduled" &&
         !t.dueDate?.enabled &&
-        t.repeat?.includes(convertDayToNumber(getYesterDay)) &&
+        t.repeat?.includes(CONVERT_DAYS[getYesterDay]) &&
         t.isChecked === false
     );
 
@@ -110,8 +112,8 @@ export default function Task() {
         !t.dueDate?.enabled &&
         t.repeat?.length !== 0 &&
         t.isChecked === false &&
-        !t.repeat?.includes(convertDayToNumber(getYesterDay)) &&
-        !t.repeat?.includes(convertDayToNumber(todayDay))
+        !t.repeat?.includes(CONVERT_DAYS[getYesterDay]) &&
+        !t.repeat?.includes(CONVERT_DAYS[todayDay])
     );
 
     return [...repeatTask, ...dueDateTask];

@@ -83,7 +83,6 @@ function TodoScreen() {
   }, [newTodoBg]);
 
   function handleBack() {
-    setTaskData([]);
     router.back();
   }
 
