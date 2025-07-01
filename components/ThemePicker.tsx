@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
 import { useThemeContext } from "@/context/ThemeContext";
@@ -30,26 +29,24 @@ export default function ThemePicker({ setColor, color }: ThemePickerProps) {
 
       <Modal
         visible={modalVisible}
-        transparent
         animationType="fade"
         onRequestClose={() => setModalVisible(false)}
+        style={styles.modalOverlay}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Choose a color:</Text>
-            <View style={styles.colorRow}>
-              {COLORS.map((color) => (
-                <TouchableOpacity
-                  key={color}
-                  style={[styles.colorCircle, { backgroundColor: color }]}
-                  onPress={() => handleColorPick(color)}
-                />
-              ))}
-            </View>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeText}>Cancel</Text>
-            </TouchableOpacity>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Choose a color:</Text>
+          <View style={styles.colorRow}>
+            {COLORS.map((color) => (
+              <TouchableOpacity
+                key={color}
+                style={[styles.colorCircle, { backgroundColor: color }]}
+                onPress={() => handleColorPick(color)}
+              />
+            ))}
           </View>
+          <TouchableOpacity onPress={() => setModalVisible(false)}>
+            <Text style={styles.closeText}>Cancel</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
     </View>

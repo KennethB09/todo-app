@@ -249,7 +249,7 @@ export default function HomeScreen() {
           </View>
         </GestureDetector>
         <Animated.FlatList
-          contentContainerStyle={styles.contentContainer}
+          contentContainerStyle={isExpand ? styles.contentContainerExpanded : styles.contentContainer}
           data={todoList}
           itemLayoutAnimation={LinearTransition}
           keyExtractor={(item) => item.id}
@@ -381,7 +381,12 @@ function createStyles(theme: Ttheme, colorScheme: string | null | undefined) {
     },
     contentContainer: {
       gap: 10,
-      height: "auto", //"75%",
+      height: "75%",
+      paddingBottom: 120,
+    },
+    contentContainerExpanded: {
+      gap: 10,
+      height: "auto",
       paddingBottom: 120,
     },
     cardCountContainer: {

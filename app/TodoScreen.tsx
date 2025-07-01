@@ -15,14 +15,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { task, Ttheme } from "@/types/dataType";
 import { useTodo } from "@/context/context";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTodoListData } from "@/context/todoListContext";
 import AddModal from "@/components/AddModal";
 import EditTask from "@/components/EditTask";
 import { useLocalNotification } from "@/context/notificationContex";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { LinearTransition } from "react-native-reanimated";
-import Task from "@/components/Task";
+import Task from "@/components/task_card/Task";
 import { useThemeContext } from "@/context/ThemeContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import ThemePicker from "@/components/ThemePicker";
@@ -41,19 +41,21 @@ export type TadoListParam = {
 
 function TodoScreen() {
   const { dispatch, userData } = useTodoListData();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { theme, colorScheme, colorTheme } = useThemeContext();
   const { data, setData } = useTodo();
+
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [toggleEdit, setToggleEdit] = useState(false);
   const [editDataList, setEditDataList] = useState<task>();
   const [todoName, setTodoName] = useState(data?.title);
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteTasktId, setDeleteTaskId] = useState<string>("");
-  const { theme, colorScheme, colorTheme } = useThemeContext();
   const [taskData, setTaskData] = useState<task[]>([]);
   const [newTodoBg, setNewTodoBg] = useState<string>(data!.bg);
   useLocalNotification();
 
   const Container = Platform.OS === "web" ? ScrollView : SafeAreaView;
+  const parentTodo = data;
 
   useEffect(() => {
     function getTask() {
@@ -64,7 +66,7 @@ function TodoScreen() {
     }
 
     getTask();
-  }, [userData]);
+  }, [userData.tasks]);
 
   useEffect(() => {
     function changeBgColor() {
@@ -81,6 +83,7 @@ function TodoScreen() {
   }, [newTodoBg]);
 
   function handleBack() {
+    setTaskData([]);
     router.back();
   }
 
@@ -92,10 +95,6 @@ function TodoScreen() {
       setEditDataList(undefined);
     }
   }
-
-  function toggleList(id: string) {
-    dispatch({ type: "CHECK_TASK", payload: id });
-  };
 
   function saveTodoName() {
     if (data?.title === todoName) {
@@ -109,9 +108,12 @@ function TodoScreen() {
 
     setData(updatedData);
     dispatch({ type: "UPDATE_TODO", payload: updatedData });
-  };
+  }
 
-  const styles = createStyles(theme, colorScheme);
+  const styles = useMemo(
+    () => createStyles(theme, colorScheme),
+    [theme, colorScheme]
+  );
 
   return (
     <SafeAreaView style={styles.mainContainer}>
@@ -179,10 +181,10 @@ function TodoScreen() {
               item={item}
               setDeleteId={setDeleteTaskId}
               setShowDeleteModal={setDeleteModal}
-              toggleList={toggleList}
               toggleEditModal={toggleEditModal}
               enablePanGesture={true}
               showFromTodo={false}
+              parentTodo={parentTodo!}
             />
           )}
         />
@@ -217,7 +219,7 @@ function TodoScreen() {
           visible={deleteModal}
           onRequestClose={() => setDeleteModal(!deleteModal)}
         >
-          <DeleteModal 
+          <DeleteModal
             title="DELETE TASK"
             paragraph="Are you sure you want to delete this task?"
             setDispatch={{ type: "DELETE_TASK", payload: deleteTasktId }}

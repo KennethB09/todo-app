@@ -45,6 +45,9 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        lazy: false,
+        freezeOnBlur: true,
+        popToTopOnBlur: true,
         tabBarActiveTintColor: colorTheme,
         headerShown: true,
         headerRight: () => {
@@ -87,6 +90,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          lazy: true,
+          freezeOnBlur: true,
           headerShown: true,
           title: "Home",
           headerTitleStyle: {
@@ -109,6 +114,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="Tasks"
         options={{
+          lazy: true,
           headerShown: true,
           title: "Tasks",
           headerTitleStyle: {

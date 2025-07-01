@@ -64,6 +64,7 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
   ]);
   const [mode, setMode] = useState<"date" | "time">("date");
   const { theme, colorScheme, colorTheme } = useThemeContext();
+  const [isEmpty, setIsEmpty] = useState(false);
   const checkPlatform = Platform.OS === "android";
   const { data } = useTodo();
   const { dispatch, userData } = useTodoListData();
@@ -142,6 +143,11 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
   }
 
   async function saveTask() {
+    if (name.length === 0) {
+      setIsEmpty(true);
+      return;
+    }
+
     const id = generateRandomId(16);
     let task: task;
     if (radioValue === "scheduled") {
@@ -179,6 +185,7 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
     dispatch({ type: "ADD_TASK", payload: task });
     setName("");
     setIsOpen(!isOpen);
+    setIsEmpty(false);
 
     if (radioValue === "scheduled") {
       Notifications.setNotificationHandler({
@@ -215,7 +222,7 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
 
   const windowL = Dimensions.get("window").width;
   const windowH = Dimensions.get("window").height;
-  const styles = createStyles(theme, colorScheme, windowL, colorTheme);
+  const styles = createStyles(theme, colorScheme, windowL, windowH, colorTheme);
 
   return (
     <View style={styles.mainContainer}>
@@ -238,6 +245,7 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
             value={name}
             autoFocus
           />
+          {isEmpty && <Text style={styles.error}>Give task a name</Text>}
         </View>
         <View style={styles.radioContainer}>
           <RadioButton
@@ -533,15 +541,22 @@ function createStyles(
   theme: Ttheme,
   colorScheme: string | null | undefined,
   windowL: number,
+  windowH: number,
   colorTheme: string
 ) {
   return StyleSheet.create({
     mainContainer: {
       width: windowL,
-      height: "100%",
+      height: windowH,
       alignContent: "center",
       justifyContent: "space-between",
       backgroundColor: theme.background,
+    },
+    error: {
+      fontFamily: theme.fontFamily,
+      fontSize: theme.fontSizeS,
+      color: "red",
+      fontWeight: "semibold",
     },
     formContainer: {
       padding: 20,

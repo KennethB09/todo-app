@@ -23,7 +23,6 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Notifications from "expo-notifications";
 import { schedulePushNotification } from "@/utils/handle-local-notification";
 import Checkbox from "expo-checkbox";
-import { useTodo } from "@/context/context";
 import { useTodoListData } from "@/context/todoListContext";
 
 type modalProps = {
@@ -42,8 +41,8 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
   const [mode, setMode] = useState<"date" | "time">("date");
   const { theme, colorScheme, colorTheme } = useThemeContext();
   const checkPlatform = Platform.OS === "android";
-  const { data } = useTodo();
   const { dispatch, userData } = useTodoListData();
+  const [isEmpty, setIsEmpty] = useState(false);
 
   function getCheckboxArray(selectedDays: day[] | undefined): Tcheckbox[] {
     const allDays: Tcheckbox[] = [
@@ -154,7 +153,12 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
   }
 
   async function saveTask() {
-    const id = task!.id;
+    
+    if (name.length === 0) {
+      setIsEmpty(true);
+      return;
+    }
+
     let edit_task: task;
     if (radioValue === "scheduled") {
       edit_task = {
@@ -226,12 +230,13 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
   }
 
   const windowL = Dimensions.get("window").width;
-  const styles = createStyles(theme, colorScheme, windowL, colorTheme);
+  const windowH = Dimensions.get("window").height;
+  const styles = createStyles(theme, colorScheme, windowL, windowH, colorTheme);
 
   return (
     <View style={styles.mainContainer}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>New Task</Text>
+        <Text style={styles.headerTitle}>Edit Task</Text>
         <Pressable
           onPress={() => setIsOpen(!isOpen)}
           style={styles.headerCloseButton}
@@ -249,6 +254,7 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
             value={name}
             autoFocus
           />
+          {isEmpty && <Text style={styles.error}>Give task a name</Text>}
         </View>
 
         {radioValue === "scheduled" && (
@@ -534,15 +540,23 @@ function createStyles(
   theme: Ttheme,
   colorScheme: string | null | undefined,
   windowL: number,
+  windowH: number,
   colorTheme: string
 ) {
   return StyleSheet.create({
     mainContainer: {
+      position: "absolute",
       width: windowL,
-      height: "100%",
+      height: windowH,
       alignContent: "center",
       justifyContent: "space-between",
       backgroundColor: theme.background,
+    },
+    error: {
+      fontFamily: theme.fontFamily,
+      fontSize: theme.fontSizeS,
+      color: "red",
+      fontWeight: "semibold",
     },
     formContainer: {
       padding: 20,

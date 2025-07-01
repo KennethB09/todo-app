@@ -2,18 +2,17 @@ import { View, Text, StyleSheet, SectionList } from "react-native";
 import React from "react";
 import { useThemeContext } from "@/context/ThemeContext";
 import { useTodoListData } from "@/context/todoListContext";
-import { task, Ttheme } from "@/types/dataType";
+import { task, Ttheme, todo } from "@/types/dataType";
 import { format } from "date-fns";
-import TaskComponent from "@/components/Task";
+import TaskComponent from "@/components/task_card/Task";
 
 export default function Task() {
-  const { userData, dispatch } = useTodoListData();
+  const { userData } = useTodoListData();
   const { theme, colorTheme } = useThemeContext();
-  const styles = createStyle(theme, colorTheme);
-
-  function toggleList(id: string) {
-    dispatch({ type: "CHECK_TASK", payload: id });
-  }
+  const styles = React.useMemo(
+    () => createStyle(theme, colorTheme),
+    [theme, colorTheme]
+  );
 
   const convertDayToNumber = (day: string) => {
     switch (day) {
@@ -118,33 +117,45 @@ export default function Task() {
     return [...repeatTask, ...dueDateTask];
   }
 
-  const CATEGORIZE_TASKS = [
-    {
-      title: "today",
-      data: filterTasksForToday(userData.tasks),
-    },
-    {
-      title: "yesterday",
-      data: filterTasksForYesterday(userData.tasks),
-    },
-    {
-      title: "past days",
-      data: filterTasksForPastDays(userData.tasks),
-    },
-  ];
+  const CATEGORIZE_TASKS = React.useMemo(
+    () => [
+      {
+        title: "today",
+        data: filterTasksForToday(userData.tasks),
+      },
+      {
+        title: "yesterday",
+        data: filterTasksForYesterday(userData.tasks),
+      },
+      {
+        title: "past days",
+        data: filterTasksForPastDays(userData.tasks),
+      },
+    ],
+    [userData.tasks]
+  );
+
+  const todoMap = React.useMemo(() => {
+    const map: Record<string, todo> = {};
+    userData.todos.forEach((t) => {
+      map[t.id] = t;
+    });
+    return map;
+  }, [userData.todos]);
 
   return (
     <View style={styles.mainContainer}>
       <SectionList
         sections={CATEGORIZE_TASKS}
         keyExtractor={(task) => task.id}
+        contentContainerStyle={styles.contentContainer}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
             <TaskComponent
               item={item}
-              toggleList={toggleList}
               enablePanGesture={false}
               showFromTodo={true}
+              parentTodo={todoMap[item.todoId]}
             />
           </View>
         )}
@@ -172,6 +183,9 @@ function createStyle(theme: Ttheme, colorTheme: string) {
     },
     itemContainer: {
       paddingHorizontal: 15,
+    },
+    contentContainer: {
+      paddingBottom: 120,
     },
   });
 }
