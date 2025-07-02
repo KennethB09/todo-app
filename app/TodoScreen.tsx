@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { task, Ttheme } from "@/types/dataType";
 import { useTodo } from "@/context/context";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTodoListData } from "@/context/todoListContext";
 import AddModal from "@/components/AddModal";
 import EditTask from "@/components/EditTask";
@@ -114,6 +114,21 @@ function TodoScreen() {
     [theme, colorScheme]
   );
 
+  const renderTaskItem = useCallback(
+  ({ item }: { item: task }) => (
+    <Task
+      item={item}
+      setDeleteId={setDeleteTaskId}
+      setShowDeleteModal={setDeleteModal}
+      toggleEditModal={toggleEditModal}
+      enablePanGesture={true}
+      showFromTodo={false}
+      parentTodo={parentTodo!}
+    />
+  ),
+  [setDeleteTaskId, setDeleteModal, toggleEditModal, parentTodo]
+);
+
   return (
     <SafeAreaView style={styles.mainContainer}>
       <StatusBar
@@ -175,17 +190,7 @@ function TodoScreen() {
               </Text>
             </View>
           }
-          renderItem={({ item }) => (
-            <Task
-              item={item}
-              setDeleteId={setDeleteTaskId}
-              setShowDeleteModal={setDeleteModal}
-              toggleEditModal={toggleEditModal}
-              enablePanGesture={true}
-              showFromTodo={false}
-              parentTodo={parentTodo!}
-            />
-          )}
+          renderItem={renderTaskItem}
         />
       </Container>
 
