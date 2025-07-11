@@ -32,10 +32,33 @@ import {
   Gesture,
 } from "react-native-gesture-handler";
 import { task, Ttheme, todo, UserData } from "@/types/dataType";
+import { CONVERT_DAYS } from "./Tasks";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MAX_TRANSLATE_Y = -SCREEN_HEIGHT * 0.4;
 const SNAP_THRESHOLD = -SCREEN_HEIGHT * 0.3;
+
+export function filterTasksForToday(tasks: task[], today = new Date()) {
+  const todayDay = today
+    .toLocaleString("en-US", { weekday: "long" })
+    .toLowerCase();
+
+  const dueDateTask = tasks.filter(
+    (t) =>
+      t.taskType === "scheduled" &&
+      t.dueDate?.enabled &&
+      format(t.dueDate.date, "MM/dd/yyyy") === format(today, "MM/dd/yyyy")
+  );
+  const repeatTask = tasks.filter(
+    (t) =>
+      t.taskType === "scheduled" &&
+      !t.dueDate?.enabled &&
+      t.repeat?.includes(CONVERT_DAYS[todayDay])
+  );
+  const simpleTask = tasks.filter((t) => t.taskType === "simple");
+
+  return [...dueDateTask, ...repeatTask, ...simpleTask];
+}
 
 export default function HomeScreen() {
   const { setData } = useTodo();
@@ -139,47 +162,6 @@ export default function HomeScreen() {
     router.navigate("/TodoScreen");
   }
 
-  function filterTasksForToday(tasks: task[], today = new Date()) {
-    const todayDay = today
-      .toLocaleString("en-US", { weekday: "long" })
-      .toLowerCase();
-
-    const convertDayToNumber = () => {
-      switch (todayDay) {
-        case "monday":
-          return 2;
-        case "tuesday":
-          return 3;
-        case "wednesday":
-          return 4;
-        case "thursday":
-          return 5;
-        case "friday":
-          return 6;
-        case "saturday":
-          return 7;
-        default:
-          return 1;
-      }
-    };
-
-    const dueDateTask = tasks.filter(
-      (t) =>
-        t.taskType === "scheduled" &&
-        t.dueDate?.enabled &&
-        format(t.dueDate.date, "MM/dd/yyyy") === format(today, "MM/dd/yyyy")
-    );
-    const repeatTask = tasks.filter(
-      (t) =>
-        t.taskType === "scheduled" &&
-        !t.dueDate?.enabled &&
-        t.repeat?.includes(convertDayToNumber())
-    );
-    const simpleTask = tasks.filter((t) => t.taskType === "simple");
-
-    return [...dueDateTask, ...repeatTask, ...simpleTask];
-  };
-
   function filterTasksForThisMonth(tasks: task[], today = new Date()) {
     const dueDateTask = tasks.filter(
       (t) =>
@@ -193,7 +175,7 @@ export default function HomeScreen() {
     const simpleTask = tasks.filter((t) => t.taskType === "simple");
 
     return [...dueDateTask, ...repeatTask, ...simpleTask];
-  };
+  }
 
   const todayTasks = filterTasksForToday(userData.tasks).length;
   const monthTasks = filterTasksForThisMonth(userData.tasks).length;
@@ -235,7 +217,11 @@ export default function HomeScreen() {
       <Container
         style={[
           animatedStyle,
-          { backgroundColor: theme.background, zIndex: 10 },
+          {
+            backgroundColor: theme.background,
+            zIndex: 10,
+            height: isExpand ? "100%" : "75%",
+          },
         ]}
       >
         <GestureDetector gesture={panGesture}>
@@ -249,7 +235,7 @@ export default function HomeScreen() {
           </View>
         </GestureDetector>
         <Animated.FlatList
-          contentContainerStyle={isExpand ? styles.contentContainerExpanded : styles.contentContainer}
+          contentContainerStyle={styles.contentContainer}
           data={todoList}
           itemLayoutAnimation={LinearTransition}
           keyExtractor={(item) => item.id}
@@ -381,12 +367,8 @@ function createStyles(theme: Ttheme, colorScheme: string | null | undefined) {
     },
     contentContainer: {
       gap: 10,
-      height: "75%",
-      paddingBottom: 120,
-    },
-    contentContainerExpanded: {
-      gap: 10,
       height: "auto",
+      minHeight: "100%",
       paddingBottom: 120,
     },
     cardCountContainer: {

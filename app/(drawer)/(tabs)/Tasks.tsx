@@ -17,6 +17,16 @@ type TconvertDay = {
   saturday: day;
 }
 
+export const CONVERT_DAYS: TconvertDay = {
+  sunday: 1,
+  monday: 2,
+  tuesday: 3,
+  wednesday: 4,
+  thursday: 5,
+  friday: 6,
+  saturday: 7
+};
+
 export default function Task() {
   const { userData } = useTodoListData();
   const { theme, colorTheme } = useThemeContext();
@@ -25,15 +35,6 @@ export default function Task() {
     [theme, colorTheme]
   );
 
-  const CONVERT_DAYS: TconvertDay = {
-    sunday: 1,
-    monday: 2,
-    tuesday: 3,
-    wednesday: 4,
-    thursday: 5,
-    friday: 6,
-    saturday: 7
-  };
 
   function filterTasksForToday(tasks: task[], today = new Date()) {
     const todayDay = today
