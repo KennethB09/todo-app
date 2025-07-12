@@ -178,7 +178,7 @@ function createStyles(theme: Ttheme) {
     horizontalCalendarDates: {
       fontFamily: theme.fontFamily,
       fontSize: theme.fontSizeML,
-      color: theme.fontColor.tertiary,
+      color: theme.fontColor.secondary,
       fontWeight: "bold",
     },
     horizontalCalendarLabel: {

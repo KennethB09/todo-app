@@ -19,7 +19,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTodoListData } from "@/context/todoListContext";
 import AddModal from "@/components/AddModal";
 import EditTask from "@/components/EditTask";
-import { useLocalNotification } from "@/context/notificationContex";
+import { useLocalNotification } from "@/context/notificationContext";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import Task from "@/components/task_card/Task";

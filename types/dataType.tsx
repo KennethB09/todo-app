@@ -39,7 +39,7 @@ export interface notification {
   id: string;
   title: string;
   content: string;
-  timeStamp: Date;
+  timestamp: Date;
 }
 
 export type Ttheme = {

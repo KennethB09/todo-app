@@ -33,6 +33,12 @@ import {
 } from "react-native-gesture-handler";
 import { task, Ttheme, todo, UserData } from "@/types/dataType";
 import { CONVERT_DAYS } from "./Tasks";
+import * as Notifications from "expo-notifications";
+import {
+  storeNotificationData,
+  checkForMissedNotifications,
+} from "@/utils/storeNotificationData";
+import { AppState, AppStateStatus } from "react-native";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MAX_TRANSLATE_Y = -SCREEN_HEIGHT * 0.4;
@@ -125,6 +131,49 @@ export default function HomeScreen() {
   };
 
   const todoList = userData.todos;
+
+  useEffect(() => {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+
+    // This works when app is in foreground
+    const notificationListener = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        storeNotificationData(notification, "received_foreground");
+      }
+    );
+
+    // This works even when app was closed and user taps notification
+    const responseListener =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        storeNotificationData(response.notification, "user_interaction");
+      });
+
+    // Check for notifications when app becomes active
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (nextAppState === "active") {
+        checkForMissedNotifications();
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
+    return () => {
+      notificationListener &&
+        Notifications.removeNotificationSubscription(notificationListener);
+      responseListener &&
+        Notifications.removeNotificationSubscription(responseListener);
+      subscription?.remove();
+    };
+  }, []);
 
   useEffect(() => {
     async function fetchData() {

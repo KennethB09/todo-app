@@ -4,8 +4,6 @@ import { Platform } from "react-native";
 import { addMinutes, format } from "date-fns";
 import { day } from "@/types/dataType";
 
-const TWO_WEEKS = 60 * 60 * 24 * 14;
-
 export const schedulePushNotification = async (
   isDueDateEnabled: boolean,
   dueDate: Date,
