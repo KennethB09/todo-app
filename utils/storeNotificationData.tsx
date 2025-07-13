@@ -1,6 +1,6 @@
 import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { notification, UserData } from "@/types/dataType";
+import { notification } from "@/types/dataType";
 
 export const checkForMissedNotifications = async (): Promise<void> => {
   try {
@@ -28,33 +28,19 @@ export const storeNotificationData = async (
       timestamp: new Date(),
     };
 
-    const json = await AsyncStorage.getItem("userData");
-    let data: UserData;
+    const json = await AsyncStorage.getItem("notificationHistory");
+    let data: notification[] = [];
 
-    // Handle case where userData doesn't exist
-    if (json === null) {
-      // Create new UserData object with empty notifications array
-      data = {
-        notifications: [],
-        todos: [],
-        tasks: [],
-      } as UserData;
-    } else {
+    if (json !== null) {
       data = JSON.parse(json);
-
-      // Ensure notifications array exists
-      if (!data.notifications) {
-        data.notifications = [];
-      }
     }
 
-    // Avoid duplicates - now safe to use .some()
-    const exists = data.notifications.some((n) => n.id === notificationData.id);
+    const exists = data.some((n) => n.id === notificationData.id);
 
     if (!exists) {
-      data.notifications.push(notificationData);
+      data.push(notificationData);
       // Store the data object, not the json string
-      await AsyncStorage.setItem("userData", JSON.stringify(data));
+      await AsyncStorage.setItem("notificationHistory", JSON.stringify(data));
     }
   } catch (error) {
     console.error("Error storing notification data:", error);

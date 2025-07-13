@@ -4,7 +4,7 @@ import { useThemeContext } from "@/context/ThemeContext";
 import { useTodoListData } from "@/context/todoListContext";
 import { task, Ttheme, todo, day } from "@/types/dataType";
 import { format } from "date-fns";
-import TaskComponent from "@/components/task_card/Task";
+import TaskItem from "@/components/task_card/TaskItem";
 
 type TconvertDay = {
   [key: string]: day;
@@ -15,7 +15,7 @@ type TconvertDay = {
   thursday: day;
   friday: day;
   saturday: day;
-}
+};
 
 export const CONVERT_DAYS: TconvertDay = {
   sunday: 1,
@@ -24,7 +24,7 @@ export const CONVERT_DAYS: TconvertDay = {
   wednesday: 4,
   thursday: 5,
   friday: 6,
-  saturday: 7
+  saturday: 7,
 };
 
 export default function Task() {
@@ -34,7 +34,6 @@ export default function Task() {
     () => createStyle(theme, colorTheme),
     [theme, colorTheme]
   );
-
 
   function filterTasksForToday(tasks: task[], today = new Date()) {
     const todayDay = today
@@ -154,9 +153,8 @@ export default function Task() {
         contentContainerStyle={styles.contentContainer}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
-            <TaskComponent
+            <TaskItem
               item={item}
-              enablePanGesture={false}
               showFromTodo={true}
               parentTodo={todoMap[item.todoId]}
             />

@@ -1,27 +1,49 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { useTodoListData } from '@/context/todoListContext'
+import { View, FlatList } from "react-native";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { notification } from "@/types/dataType";
+import { useTodoListData } from "@/context/todoListContext";
+import NotificationItem from "@/components/NotificationItem";
+import GestureWrapper from "@/components/GestureWrapper";
 
-const Notifications = () => {
+export default function Notifications() {
+  const { userData, dispatch } = useTodoListData();
+  const [notifications, setNotifications] = useState<notification[]>([]);
 
-  const { userData } = useTodoListData();
-  const notifications = userData?.notifications || [];
+  useEffect(() => {
+    async function checkNotifications() {
+      try {
+        const json = await AsyncStorage.getItem("notificationHistory");
+        const data: notification[] = json != null ? JSON.parse(json) : null;
+        if (data) {
+          dispatch({ type: "SET_NOTIFICATIONS", payload: data });
+        }
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
+    }
+    checkNotifications();
+  }, []);
+
+  useEffect(() => {
+    setNotifications(userData.notifications);
+  }, [userData.notifications]);
+
+  function handleDelete() {
+    console.log("deleted")
+  }
+
   return (
     <View>
-      <Text>Notifications</Text>
-      {notifications.length > 0 ? (
-        notifications.map((notification, index) => (
-          <View key={index}>
-            <Text>{notification.title}</Text>
-            <Text>{notification.content}</Text>
-            <Text>{new Date(notification.timestamp).toLocaleString()}</Text>
-          </View>
-        ))
-      ) : (
-        <Text>No notifications</Text>
-      )}
+      <FlatList
+        data={notifications}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <GestureWrapper onGesureEnd={handleDelete}>
+            <NotificationItem notification={item} />
+          </GestureWrapper>
+        )}
+      />
     </View>
-  )
+  );
 }
-
-export default Notifications

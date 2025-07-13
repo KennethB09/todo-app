@@ -22,11 +22,12 @@ import EditTask from "@/components/EditTask";
 import { useLocalNotification } from "@/context/notificationContext";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { LinearTransition } from "react-native-reanimated";
-import Task from "@/components/task_card/Task";
 import { useThemeContext } from "@/context/ThemeContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import ThemePicker from "@/components/ThemePicker";
 import DeleteModal from "@/components/DeleteModal";
+import GestureWrapper from "@/components/GestureWrapper";
+import TaskItem from "@/components/task_card/TaskItem";
 
 export type TadoListParam = {
   name: string;
@@ -114,20 +115,10 @@ function TodoScreen() {
     [theme, colorScheme]
   );
 
-  const renderTaskItem = useCallback(
-  ({ item }: { item: task }) => (
-    <Task
-      item={item}
-      setDeleteId={setDeleteTaskId}
-      setShowDeleteModal={setDeleteModal}
-      toggleEditModal={toggleEditModal}
-      enablePanGesture={true}
-      showFromTodo={false}
-      parentTodo={parentTodo!}
-    />
-  ),
-  [setDeleteTaskId, setDeleteModal, toggleEditModal, parentTodo]
-);
+  function onDelete(id: string) {
+    setDeleteTaskId(id);
+    setDeleteModal((prev) => !prev);
+  }
 
   return (
     <SafeAreaView style={styles.mainContainer}>
@@ -190,7 +181,11 @@ function TodoScreen() {
               </Text>
             </View>
           }
-          renderItem={renderTaskItem}
+          renderItem={({ item }) => (
+            <GestureWrapper onGesureEnd={() => onDelete(item.id)}>
+              <TaskItem item={item} parentTodo={parentTodo!} showFromTodo={false} toggleEditModal={toggleEditModal}/>
+            </GestureWrapper>
+          )}
         />
       </Container>
 

@@ -39,6 +39,7 @@ import {
   checkForMissedNotifications,
 } from "@/utils/storeNotificationData";
 import { AppState, AppStateStatus } from "react-native";
+import GestureWrapper from "@/components/GestureWrapper";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MAX_TRANSLATE_Y = -SCREEN_HEIGHT * 0.4;
@@ -74,7 +75,7 @@ export default function HomeScreen() {
   const [deleteTodoId, setDeleteTodoId] = useState<string>("");
   const router = useRouter();
   const Container = Platform.OS === "web" ? ScrollView : Animated.View;
-  const styles = createStyles(theme, colorScheme);
+  const styles = createStyles(theme);
   const [isExpand, setIsExpand] = useState(false);
   const translateY = useSharedValue(0);
   const prevTranslationY = useSharedValue(0);
@@ -226,6 +227,11 @@ export default function HomeScreen() {
     return [...dueDateTask, ...repeatTask, ...simpleTask];
   }
 
+  function onDelete(id: string) {
+    setDeleteTodoId(id);
+    setShowDeleteModal(!showDeleteModal);
+  }
+
   const todayTasks = filterTasksForToday(userData.tasks).length;
   const monthTasks = filterTasksForThisMonth(userData.tasks).length;
   const completedTasks = userData.tasks.filter(
@@ -309,15 +315,9 @@ export default function HomeScreen() {
             </View>
           }
           renderItem={({ item }) => (
-            <Pressable onPress={() => onPressed(item)}>
-              <Card
-                styleProps={theme}
-                item={item}
-                setDeleteTodoId={setDeleteTodoId}
-                setShowDeleteModal={setShowDeleteModal}
-                showDeleteModal={showDeleteModal}
-              />
-            </Pressable>
+            <GestureWrapper onGesureEnd={() => onDelete(item.id)} iconSize={30}>
+              <Card onPress={() => onPressed(item)} item={item} />
+            </GestureWrapper>
           )}
         />
       </Container>
@@ -342,7 +342,7 @@ export default function HomeScreen() {
   );
 }
 
-function createStyles(theme: Ttheme, colorScheme: string | null | undefined) {
+function createStyles(theme: Ttheme) {
   return StyleSheet.create({
     mainContainer: {
       width: "100%",
