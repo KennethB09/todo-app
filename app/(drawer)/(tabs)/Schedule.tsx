@@ -30,11 +30,28 @@ export default function CustomAgenda() {
   const { userData } = useTodoListData();
   const { theme, colorTheme } = useThemeContext();
   const thisMonth = format(today, "LLLL d");
-  const todayTask = filterTasksForToday(userData.tasks).length;
+  const todayTask = filterTasksForToday(userData.tasks).filter(
+    (t) => t.isChecked === false
+  ).length;
   const styles = createStyles(theme);
-  let selectedDayTasks = userData.tasks.filter(task => task.dueDate?.enabled && format(task.dueDate.date, "yyyy-MM-dd") === selected && !task.isChecked);
-  const repeatingTasks = userData.tasks.filter(task => task.taskType === "scheduled" && !task.dueDate?.enabled && task.repeat?.includes(CONVERT_DAYS[format(selected, "EEEE").toLowerCase()]) && !task.isChecked);
-  const simpleTasks = userData.tasks.filter(task => task.taskType === "simple" && !task.isChecked);
+  let selectedDayTasks = userData.tasks.filter(
+    (task) =>
+      task.dueDate?.enabled &&
+      format(task.dueDate.date, "yyyy-MM-dd") === selected &&
+      !task.isChecked
+  );
+  const repeatingTasks = userData.tasks.filter(
+    (task) =>
+      task.taskType === "scheduled" &&
+      !task.dueDate?.enabled &&
+      task.repeat?.includes(
+        CONVERT_DAYS[format(selected, "EEEE").toLowerCase()]
+      ) &&
+      !task.isChecked
+  );
+  const simpleTasks = userData.tasks.filter(
+    (task) => task.taskType === "simple" && !task.isChecked
+  );
   selectedDayTasks = [...selectedDayTasks, ...repeatingTasks, ...simpleTasks];
 
   const selectedIndex = days.findIndex(
@@ -48,7 +65,8 @@ export default function CustomAgenda() {
       // Calculate the first index of the 7-day group so selected is in the middle
       let firstIndex = selectedIndex - Math.floor(DAYS_PER_SNAP / 2);
       if (firstIndex < 0) firstIndex = 0;
-      if (firstIndex > days.length - DAYS_PER_SNAP) firstIndex = days.length - DAYS_PER_SNAP;
+      if (firstIndex > days.length - DAYS_PER_SNAP)
+        firstIndex = days.length - DAYS_PER_SNAP;
       flatListRef.current.scrollToIndex({
         index: firstIndex,
         animated: true,
@@ -59,9 +77,13 @@ export default function CustomAgenda() {
 
   function onSelectDate(date: string) {
     setSelected(date);
-    selectedDayTasks = userData.tasks.filter(task => task.dueDate?.enabled && format(task.dueDate.date, "yyyy-MM-dd") === date);
+    selectedDayTasks = userData.tasks.filter(
+      (task) =>
+        task.dueDate?.enabled &&
+        format(task.dueDate.date, "yyyy-MM-dd") === date
+    );
     selectedDayTasks = [...selectedDayTasks, ...repeatingTasks, ...simpleTasks];
-  };
+  }
 
   return (
     <View style={styles.mainContainer}>
@@ -79,7 +101,10 @@ export default function CustomAgenda() {
         snapToAlignment="start"
         decelerationRate="fast"
         snapToInterval={ITEM_WIDTH * DAYS_PER_SNAP}
-        initialScrollIndex={Math.max(selectedIndex - Math.floor(DAYS_PER_SNAP / 2), 0)}
+        initialScrollIndex={Math.max(
+          selectedIndex - Math.floor(DAYS_PER_SNAP / 2),
+          0
+        )}
         getItemLayout={(_, index) => ({
           length: ITEM_WIDTH,
           offset: ITEM_WIDTH * index,
@@ -87,7 +112,8 @@ export default function CustomAgenda() {
         })}
         contentContainerStyle={{
           ...styles.horizontalCalendar,
-          paddingHorizontal: (Dimensions.get("window").width - ITEM_WIDTH * DAYS_PER_SNAP) / 2,
+          paddingHorizontal:
+            (Dimensions.get("window").width - ITEM_WIDTH * DAYS_PER_SNAP) / 2,
         }}
         renderItem={({ item }) => {
           const dateStr = format(item, "yyyy-MM-dd");
@@ -137,8 +163,8 @@ export default function CustomAgenda() {
         <FlatList
           data={selectedDayTasks}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <AgendaItem item={item}  />}
-          contentContainerStyle={{ paddingBottom: 60,  }}
+          renderItem={({ item }) => <AgendaItem item={item} />}
+          contentContainerStyle={{ paddingBottom: 60 }}
           showsVerticalScrollIndicator={false}
         />
       </View>
@@ -148,9 +174,7 @@ export default function CustomAgenda() {
 
 function createStyles(theme: Ttheme) {
   return StyleSheet.create({
-    mainContainer: {
-
-    },
+    mainContainer: {},
     header: {
       alignItems: "center",
       marginBottom: 10,
@@ -193,6 +217,6 @@ function createStyles(theme: Ttheme) {
       color: theme.fontColor.primary,
       fontWeight: "bold",
       margin: 10,
-    }
+    },
   });
 }

@@ -205,7 +205,7 @@ export default function HomeScreen() {
       }
     }
     saveData();
-  }, [todoList]);
+  }, [todoList, userData]);
 
   function onPressed(item: todo) {
     setData(item);
@@ -234,7 +234,7 @@ export default function HomeScreen() {
 
   const todayTasks = filterTasksForToday(userData.tasks).length;
   const monthTasks = filterTasksForThisMonth(userData.tasks).length;
-  const completedTasks = userData.tasks.filter(
+  const completedTasks = filterTasksForToday(userData.tasks).filter(
     (task: task) => task.isChecked
   ).length;
   const todos = userData.todos.length;

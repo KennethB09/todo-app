@@ -20,7 +20,7 @@ type TuserDataAction =
   | { type: "DELETE_TODO"; payload: string }
   | { type: "SET_NOTIFICATIONS"; payload: notification[] }
   | { type: "ADD_NOTIFICATION"; payload: notification }
-  | { type: "DELETE_NOTIFICATION"; payload: notification };
+  | { type: "DELETE_NOTIFICATION"; payload: string };
 
 type TuserDataState = {
   userData: UserData;
@@ -120,7 +120,7 @@ const todoListReducer = (
         userData: {
           ...state.userData,
           notifications: state.userData.notifications.filter(
-            (n) => n.id !== action.payload.id
+            (n) => n.id !== action.payload
           ),
         },
       };

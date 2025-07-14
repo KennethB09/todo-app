@@ -1,10 +1,11 @@
-import { View, FlatList } from "react-native";
+import { View } from "react-native";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { notification } from "@/types/dataType";
 import { useTodoListData } from "@/context/todoListContext";
 import NotificationItem from "@/components/NotificationItem";
 import GestureWrapper from "@/components/GestureWrapper";
+import Animated, { LinearTransition } from "react-native-reanimated";
 
 export default function Notifications() {
   const { userData, dispatch } = useTodoListData();
@@ -26,20 +27,29 @@ export default function Notifications() {
   }, []);
 
   useEffect(() => {
+    async function saveNotification() {
+      await AsyncStorage.setItem(
+        "notificationHistory",
+        JSON.stringify(userData.notifications)
+      );
+    }
+    saveNotification();
     setNotifications(userData.notifications);
   }, [userData.notifications]);
 
-  function handleDelete() {
-    console.log("deleted")
-  }
+  function handleDelete(id: string) {
+    dispatch({ type: "DELETE_NOTIFICATION", payload: id });
+  };
 
   return (
     <View>
-      <FlatList
+      <Animated.FlatList
         data={notifications}
         keyExtractor={(item) => item.id}
+        itemLayoutAnimation={LinearTransition}
+        keyboardDismissMode={"on-drag"}
         renderItem={({ item }) => (
-          <GestureWrapper onGesureEnd={handleDelete}>
+          <GestureWrapper onGesureEnd={() => handleDelete(item.id)}>
             <NotificationItem notification={item} />
           </GestureWrapper>
         )}
