@@ -23,7 +23,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Notifications from "expo-notifications";
 import { schedulePushNotification } from "@/utils/handle-local-notification";
 import Checkbox from "expo-checkbox";
-import { useTodoListData } from "@/context/todoListContext";
+import { useTodoListStore } from "@/context/zustand";
 
 type modalProps = {
   task: task | undefined;
@@ -41,8 +41,8 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
   const [mode, setMode] = useState<"date" | "time">("date");
   const { theme, colorScheme, colorTheme } = useThemeContext();
   const checkPlatform = Platform.OS === "android";
-  const { dispatch, userData } = useTodoListData();
   const [isEmpty, setIsEmpty] = useState(false);
+  const editTask = useTodoListStore((state) => state.editTask);
 
   function getCheckboxArray(selectedDays: day[] | undefined): Tcheckbox[] {
     const allDays: Tcheckbox[] = [
@@ -192,7 +192,7 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
       };
     }
 
-    dispatch({ type: "EDIT_TASK", payload: edit_task });
+    editTask(edit_task)
     setName("");
     setIsOpen(!isOpen);
 

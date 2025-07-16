@@ -4,17 +4,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, DrawerActions } from "@react-navigation/native";
 import { pastelBg } from "@/constants/theme";
 import { useThemeContext } from "@/context/ThemeContext";
-import { useTodoListData } from "@/context/todoListContext";
-import { useTodo } from "@/context/context";
 import { StyleSheet, View } from "react-native";
 import { todo } from "@/types/dataType";
+import { useTodoListStore } from "@/context/zustand";
 
 export default function TabLayout() {
   const { colorTheme, theme, colorScheme } = useThemeContext();
-  const { dispatch } = useTodoListData();
-  const { setData } = useTodo();
   const navigation = useNavigation();
   const router = useRouter();
+  const createNewTodo = useTodoListStore((state) => state.createTodo);
 
   function generateRandomId(length = 16) {
     const characters =
@@ -37,9 +35,9 @@ export default function TabLayout() {
       bg: pastelBg[randomBg],
     };
 
-    dispatch({ type: "CREATE_TODO", payload: newTodo });
-    setData(newTodo);
-    router.push("/TodoScreen");
+    // dispatch({ type: "CREATE_TODO", payload: newTodo });
+    createNewTodo(newTodo)
+    router.push({ pathname: "/[id]", params: { id: newTodo.id, bg: newTodo.bg } });
   }
 
   return (

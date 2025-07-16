@@ -10,12 +10,9 @@ import {
   Modal,
   Dimensions,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { Link } from "expo-router";
 import Card from "@/components/Card";
 import { useEffect, useState } from "react";
-import { useTodo } from "@/context/context";
-import { useTodoListData } from "@/context/todoListContext";
-import { format } from "date-fns";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeContext } from "@/context/ThemeContext";
 import Animated, {
@@ -31,8 +28,7 @@ import {
   GestureDetector,
   Gesture,
 } from "react-native-gesture-handler";
-import { task, Ttheme, todo, UserData } from "@/types/dataType";
-import { CONVERT_DAYS } from "./Tasks";
+import { Ttheme, UserData } from "@/types/dataType";
 import * as Notifications from "expo-notifications";
 import {
   storeNotificationData,
@@ -40,45 +36,31 @@ import {
 } from "@/utils/storeNotificationData";
 import { AppState, AppStateStatus } from "react-native";
 import GestureWrapper from "@/components/GestureWrapper";
+import { useTodoListStore } from "@/context/zustand";
+import HomeCards from "@/components/HomeCards";
+import EmptyList from "@/components/EmptyList";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MAX_TRANSLATE_Y = -SCREEN_HEIGHT * 0.4;
 const SNAP_THRESHOLD = -SCREEN_HEIGHT * 0.3;
 
-export function filterTasksForToday(tasks: task[], today = new Date()) {
-  const todayDay = today
-    .toLocaleString("en-US", { weekday: "long" })
-    .toLowerCase();
-
-  const dueDateTask = tasks.filter(
-    (t) =>
-      t.taskType === "scheduled" &&
-      t.dueDate?.enabled &&
-      format(t.dueDate.date, "MM/dd/yyyy") === format(today, "MM/dd/yyyy")
-  );
-  const repeatTask = tasks.filter(
-    (t) =>
-      t.taskType === "scheduled" &&
-      !t.dueDate?.enabled &&
-      t.repeat?.includes(CONVERT_DAYS[todayDay])
-  );
-  const simpleTask = tasks.filter((t) => t.taskType === "simple");
-
-  return [...dueDateTask, ...repeatTask, ...simpleTask];
-}
-
 export default function HomeScreen() {
-  const { setData } = useTodo();
-  const { dispatch, userData } = useTodoListData();
+  const Container = Platform.OS === "web" ? ScrollView : Animated.View;
+
   const { theme, colorScheme } = useThemeContext();
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTodoId, setDeleteTodoId] = useState<string>("");
-  const router = useRouter();
-  const Container = Platform.OS === "web" ? ScrollView : Animated.View;
-  const styles = createStyles(theme);
   const [isExpand, setIsExpand] = useState(false);
+
   const translateY = useSharedValue(0);
   const prevTranslationY = useSharedValue(0);
+
+  const setData = useTodoListStore((state) => state.setData);
+  const deleteTodo = useTodoListStore((state) => state.deleteTodo);
+  const todoList = useTodoListStore((state) => state.userData.todos);
+  const userData = useTodoListStore((state) => state.userData);
+  const styles = createStyles(theme);
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
@@ -131,8 +113,6 @@ export default function HomeScreen() {
     notifications: [],
   };
 
-  const todoList = userData.todos;
-
   useEffect(() => {
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -181,11 +161,18 @@ export default function HomeScreen() {
       try {
         const json = await AsyncStorage.getItem("userData");
         const data: UserData = json != null ? JSON.parse(json) : null;
-        // console.log(json)
         if (data) {
-          dispatch({ type: "SET_DATA", payload: data });
+          setData({
+            todos: data.todos,
+            tasks: data.tasks,
+            notifications: [],
+          });
         } else {
-          dispatch({ type: "SET_DATA", payload: boilerData });
+          setData({
+            todos: boilerData.todos,
+            tasks: boilerData.tasks,
+            notifications: boilerData.notifications,
+          });
         }
       } catch (error) {
         console.error(error);
@@ -207,37 +194,10 @@ export default function HomeScreen() {
     saveData();
   }, [todoList, userData]);
 
-  function onPressed(item: todo) {
-    setData(item);
-    router.navigate("/TodoScreen");
-  }
-
-  function filterTasksForThisMonth(tasks: task[], today = new Date()) {
-    const dueDateTask = tasks.filter(
-      (t) =>
-        t.taskType === "scheduled" &&
-        t.dueDate?.enabled &&
-        format(t.dueDate.date, "MM/yyyy") === format(today, "MM/yyyy")
-    );
-    const repeatTask = tasks.filter(
-      (t) => t.taskType === "scheduled" && !t.dueDate?.enabled
-    );
-    const simpleTask = tasks.filter((t) => t.taskType === "simple");
-
-    return [...dueDateTask, ...repeatTask, ...simpleTask];
-  }
-
   function onDelete(id: string) {
     setDeleteTodoId(id);
     setShowDeleteModal(!showDeleteModal);
   }
-
-  const todayTasks = filterTasksForToday(userData.tasks).length;
-  const monthTasks = filterTasksForThisMonth(userData.tasks).length;
-  const completedTasks = filterTasksForToday(userData.tasks).filter(
-    (task: task) => task.isChecked
-  ).length;
-  const todos = userData.todos.length;
 
   return (
     <SafeAreaView style={styles.mainContainer}>
@@ -246,28 +206,7 @@ export default function HomeScreen() {
         backgroundColor={theme.background}
       />
 
-      <View style={styles.cardContainer}>
-        <View style={styles.todaysCard}>
-          <Text style={styles.todaysCardTitle}>Todays's Tasks</Text>
-          <Text style={styles.cardCount}>
-            {completedTasks} / {todayTasks}
-          </Text>
-          <Text style={styles.todaysCardText}>Completed</Text>
-        </View>
-        <View style={styles.colCardContainer}>
-          <View style={styles.monthCard}>
-            <Text style={styles.cardTitle}>This Month</Text>
-            <View style={styles.cardCountContainer}>
-              <Text style={styles.cardCount}>{monthTasks}</Text>
-              <Text style={styles.cardCountLabel}>Tasks</Text>
-            </View>
-          </View>
-          <View style={styles.todosCard}>
-            <Text style={styles.cardTitle}>Todo's</Text>
-            <Text style={styles.cardCount}>{todos}</Text>
-          </View>
-        </View>
-      </View>
+      <HomeCards />
 
       <Container
         style={[
@@ -294,29 +233,17 @@ export default function HomeScreen() {
           data={todoList}
           itemLayoutAnimation={LinearTransition}
           keyExtractor={(item) => item.id}
-          ListEmptyComponent={
-            <View
-              style={{
-                width: "100%",
-                height: "100%",
-                justifyContent: "center",
-                alignContent: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: theme.listInfo,
-                  textAlign: "center",
-                  fontSize: 20,
-                }}
-              >
-                Create Todo
-              </Text>
-            </View>
-          }
+          ListEmptyComponent={<EmptyList text="Create Todo" />}
           renderItem={({ item }) => (
             <GestureWrapper onGesureEnd={() => onDelete(item.id)} iconSize={30}>
-              <Card onPress={() => onPressed(item)} item={item} />
+              <Link
+                href={{
+                  pathname: "/[id]",
+                  params: { id: item.id, bg: item.bg },
+                }}
+              >
+                <Card item={item} />
+              </Link>
             </GestureWrapper>
           )}
         />
@@ -332,7 +259,7 @@ export default function HomeScreen() {
           <DeleteModal
             title="DELETE TODO"
             paragraph="Are you sure you want to delete this todo?"
-            setDispatch={{ type: "DELETE_TODO", payload: deleteTodoId }}
+            setDispatch={() => deleteTodo(deleteTodoId)}
             setShowDeleteModal={setShowDeleteModal}
             showDeleteModal={showDeleteModal}
           />
@@ -349,89 +276,11 @@ function createStyles(theme: Ttheme) {
       height: "100%",
       backgroundColor: theme.background,
     },
-    cardContainer: {
-      height: "35%",
-      width: "100%",
-      flexDirection: "row",
-      justifyContent: "space-between",
-      paddingHorizontal: 10,
-    },
-    todaysCard: {
-      backgroundColor: "#D2CCF2",
-      paddingHorizontal: 10,
-      paddingVertical: 20,
-      borderRadius: 10,
-      width: "49%",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    todaysCardTitle: {
-      fontFamily: theme.fontFamily,
-      lineHeight: 40,
-      fontSize: theme.fontSizeEX,
-      fontWeight: "semibold",
-      color: theme.fontColor.primary,
-    },
-    cardCount: {
-      textAlign: "center",
-      fontSize: theme.fontSizeNumber,
-      letterSpacing: -5,
-      fontFamily: theme.fontFamily,
-      fontWeight: "bold",
-      color: theme.pallete.light,
-    },
-    todaysCardText: {
-      fontFamily: theme.fontFamily,
-      fontSize: theme.fontSizeML,
-      fontWeight: "semibold",
-      color: theme.pallete.lightGray,
-    },
-    colCardContainer: {
-      width: "49%",
-      justifyContent: "space-between",
-    },
-    monthCard: {
-      backgroundColor: "#F5E29E",
-      padding: 10,
-      paddingHorizontal: 20,
-      borderRadius: 10,
-      width: "100%",
-      height: "49%",
-      justifyContent: "space-between",
-    },
-    todosCard: {
-      backgroundColor: "#A9E8E8",
-      paddingHorizontal: 20,
-      padding: 10,
-      borderRadius: 10,
-      width: "100%",
-      height: "49%",
-      justifyContent: "space-between",
-    },
-    cardTitle: {
-      fontFamily: theme.fontFamily,
-      fontSize: theme.fonstSizeTitle,
-      fontWeight: "semibold",
-      color: theme.fontColor.primary,
-    },
     contentContainer: {
       gap: 10,
       height: "auto",
       minHeight: "100%",
       paddingBottom: 120,
-    },
-    cardCountContainer: {
-      width: "100%",
-      justifyContent: "center",
-      flexDirection: "row",
-      alignItems: "flex-end",
-      gap: 10,
-    },
-    cardCountLabel: {
-      fontFamily: theme.fontFamily,
-      fontSize: theme.fontSizeM,
-      color: theme.pallete.lightGray,
-      paddingBottom: 7,
     },
     todosListHeader: {
       width: "100%",

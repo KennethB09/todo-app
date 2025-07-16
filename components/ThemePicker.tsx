@@ -7,7 +7,7 @@ import { pastelBg } from "@/constants/theme";
 const COLORS = pastelBg;
 
 type ThemePickerProps = {
-  setColor: React.Dispatch<React.SetStateAction<string>>;
+  setColor: React.Dispatch<React.SetStateAction<any>>;
   color: string;
 };
 
@@ -28,13 +28,15 @@ export default function ThemePicker({ setColor, color }: ThemePickerProps) {
       </TouchableOpacity>
 
       <Modal
+        transparent={true}
         visible={modalVisible}
         animationType="fade"
         onRequestClose={() => setModalVisible(false)}
-        style={styles.modalOverlay}
+        
       >
+        <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Choose a color:</Text>
+          <Text style={styles.modalTitle}>Choose a color</Text>
           <View style={styles.colorRow}>
             {COLORS.map((color) => (
               <TouchableOpacity
@@ -47,6 +49,7 @@ export default function ThemePicker({ setColor, color }: ThemePickerProps) {
           <TouchableOpacity onPress={() => setModalVisible(false)}>
             <Text style={styles.closeText}>Cancel</Text>
           </TouchableOpacity>
+        </View>
         </View>
       </Modal>
     </View>

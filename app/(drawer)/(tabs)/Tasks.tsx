@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, SectionList } from "react-native";
 import React from "react";
 import { useThemeContext } from "@/context/ThemeContext";
-import { useTodoListData } from "@/context/todoListContext";
-import { task, Ttheme, todo, day } from "@/types/dataType";
+import { useTodoListStore } from "@/context/zustand";
+import { task, Ttheme, day } from "@/types/dataType";
 import { format } from "date-fns";
 import TaskItem from "@/components/task_card/TaskItem";
 
@@ -28,12 +28,10 @@ export const CONVERT_DAYS: TconvertDay = {
 };
 
 export default function Task() {
-  const { userData } = useTodoListData();
-  const { theme, colorTheme } = useThemeContext();
-  const styles = React.useMemo(
-    () => createStyle(theme, colorTheme),
-    [theme, colorTheme]
-  );
+  const tasks = useTodoListStore((state) => state.userData.tasks);
+  const todos = useTodoListStore((state) => state.userData.todos);
+  const { theme } = useThemeContext();
+  const styles = createStyle(theme);
 
   function filterTasksForToday(tasks: task[], today = new Date()) {
     const todayDay = today
@@ -119,31 +117,20 @@ export default function Task() {
     return [...repeatTask, ...dueDateTask];
   }
 
-  const CATEGORIZE_TASKS = React.useMemo(
-    () => [
-      {
-        title: "today",
-        data: filterTasksForToday(userData.tasks),
-      },
-      {
-        title: "yesterday",
-        data: filterTasksForYesterday(userData.tasks),
-      },
-      {
-        title: "past days",
-        data: filterTasksForPastDays(userData.tasks),
-      },
-    ],
-    [userData.tasks]
-  );
-
-  const todoMap = React.useMemo(() => {
-    const map: Record<string, todo> = {};
-    userData.todos.forEach((t) => {
-      map[t.id] = t;
-    });
-    return map;
-  }, [userData.todos]);
+  const CATEGORIZE_TASKS = [
+    {
+      title: "today",
+      data: filterTasksForToday(tasks),
+    },
+    {
+      title: "yesterday",
+      data: filterTasksForYesterday(tasks),
+    },
+    {
+      title: "past days",
+      data: filterTasksForPastDays(tasks),
+    },
+  ];
 
   return (
     <View style={styles.mainContainer}>
@@ -156,7 +143,7 @@ export default function Task() {
             <TaskItem
               item={item}
               showFromTodo={true}
-              parentTodo={todoMap[item.todoId]}
+              parentTodo={todos.find(todo => todo.id === item.todoId)!}
             />
           </View>
         )}
@@ -168,7 +155,7 @@ export default function Task() {
   );
 }
 
-function createStyle(theme: Ttheme, colorTheme: string) {
+function createStyle(theme: Ttheme) {
   return StyleSheet.create({
     mainContainer: {
       height: "100%",

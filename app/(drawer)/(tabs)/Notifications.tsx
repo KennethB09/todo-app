@@ -2,14 +2,15 @@ import { View } from "react-native";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { notification } from "@/types/dataType";
-import { useTodoListData } from "@/context/todoListContext";
+import { useTodoListStore } from "@/context/zustand";
 import NotificationItem from "@/components/NotificationItem";
 import GestureWrapper from "@/components/GestureWrapper";
 import Animated, { LinearTransition } from "react-native-reanimated";
 
 export default function Notifications() {
-  const { userData, dispatch } = useTodoListData();
-  const [notifications, setNotifications] = useState<notification[]>([]);
+ const notifications = useTodoListStore((state) => state.userData.notifications);
+ const setNotifications = useTodoListStore((state) => state.setNotifications);
+ const deleteNotification = useTodoListStore((state) => state.deleteNotification);
 
   useEffect(() => {
     async function checkNotifications() {
@@ -17,7 +18,7 @@ export default function Notifications() {
         const json = await AsyncStorage.getItem("notificationHistory");
         const data: notification[] = json != null ? JSON.parse(json) : null;
         if (data) {
-          dispatch({ type: "SET_NOTIFICATIONS", payload: data });
+          setNotifications(data)
         }
       } catch (error) {
         console.error("Error fetching notifications:", error);
@@ -26,19 +27,16 @@ export default function Notifications() {
     checkNotifications();
   }, []);
 
-  useEffect(() => {
-    async function saveNotification() {
-      await AsyncStorage.setItem(
-        "notificationHistory",
-        JSON.stringify(userData.notifications)
-      );
-    }
-    saveNotification();
-    setNotifications(userData.notifications);
-  }, [userData.notifications]);
-
+  async function saveNotification() {
+    await AsyncStorage.setItem(
+      "notificationHistory",
+      JSON.stringify(notifications)
+    );
+  }
+  
   function handleDelete(id: string) {
-    dispatch({ type: "DELETE_NOTIFICATION", payload: id });
+    deleteNotification(id)
+    saveNotification();
   };
 
   return (

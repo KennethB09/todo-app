@@ -6,17 +6,15 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useThemeContext } from "@/context/ThemeContext";
-import { useTodoListData } from "@/context/todoListContext";
 import { Ttheme } from "@/types/dataType";
 import React from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 type deleteModalProps = {
   title: string;
   paragraph: string;
   setShowDeleteModal: React.Dispatch<React.SetStateAction<boolean>>;
   showDeleteModal: boolean;
-  setDispatch: { type: "DELETE_TODO" | "DELETE_TASK", payload: string };
+  setDispatch: () => void;
 };
 
 export default function DeleteModal({
@@ -27,13 +25,12 @@ export default function DeleteModal({
   setDispatch
 }: deleteModalProps) {
   const { theme, colorScheme, colorTheme } = useThemeContext();
-  const { dispatch } = useTodoListData();
   const windowL = Dimensions.get("window").width;
   const windowH = Dimensions.get("window").height;
   const styles = createStyles(theme, colorScheme, windowH, windowL, colorTheme);
 
   function deleteTodo() {
-    dispatch(setDispatch);
+    setDispatch();
     setShowDeleteModal(!showDeleteModal);
   };
 

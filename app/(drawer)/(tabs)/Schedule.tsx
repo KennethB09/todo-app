@@ -8,8 +8,8 @@ import {
   Dimensions,
 } from "react-native";
 import { format, eachDayOfInterval, addDays } from "date-fns";
-import { filterTasksForToday } from ".";
-import { useTodoListData } from "@/context/todoListContext";
+import { filterTasksForToday } from "@/components/HomeCards";
+import { useTodoListStore } from "@/context/zustand";
 import { useThemeContext } from "@/context/ThemeContext";
 import { Ttheme } from "@/types/dataType";
 import AgendaItem from "@/components/AgendaItem";
@@ -27,20 +27,23 @@ const DAYS_PER_SNAP = 7;
 
 export default function CustomAgenda() {
   const [selected, setSelected] = useState(format(today, "yyyy-MM-dd"));
-  const { userData } = useTodoListData();
+  const tasks = useTodoListStore((state) => state.userData.tasks);
   const { theme, colorTheme } = useThemeContext();
   const thisMonth = format(today, "LLLL d");
-  const todayTask = filterTasksForToday(userData.tasks).filter(
+  const todayTask = filterTasksForToday(tasks).filter(
     (t) => t.isChecked === false
   ).length;
+
   const styles = createStyles(theme);
-  let selectedDayTasks = userData.tasks.filter(
+
+  let selectedDayTasks = tasks.filter(
     (task) =>
       task.dueDate?.enabled &&
       format(task.dueDate.date, "yyyy-MM-dd") === selected &&
       !task.isChecked
   );
-  const repeatingTasks = userData.tasks.filter(
+
+  const repeatingTasks = tasks.filter(
     (task) =>
       task.taskType === "scheduled" &&
       !task.dueDate?.enabled &&
@@ -49,14 +52,17 @@ export default function CustomAgenda() {
       ) &&
       !task.isChecked
   );
-  const simpleTasks = userData.tasks.filter(
+
+  const simpleTasks = tasks.filter(
     (task) => task.taskType === "simple" && !task.isChecked
   );
+
   selectedDayTasks = [...selectedDayTasks, ...repeatingTasks, ...simpleTasks];
 
   const selectedIndex = days.findIndex(
     (date) => format(date, "yyyy-MM-dd") === selected
   );
+
   const flatListRef = useRef<FlatList>(null);
 
   // Snap to selected date in the middle of the 7-day group
@@ -77,7 +83,7 @@ export default function CustomAgenda() {
 
   function onSelectDate(date: string) {
     setSelected(date);
-    selectedDayTasks = userData.tasks.filter(
+    selectedDayTasks = tasks.filter(
       (task) =>
         task.dueDate?.enabled &&
         format(task.dueDate.date, "yyyy-MM-dd") === date

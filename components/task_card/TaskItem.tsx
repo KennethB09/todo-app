@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Checkbox from "expo-checkbox";
-import { useTodoListData } from "@/context/todoListContext";
 import { useThemeContext } from "@/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import TaskSchedule from "./TaskSchedule";
+import { useTodoListStore } from "@/context/zustand";
 
 type TaskItemProps = {
   item: task;
@@ -25,11 +25,11 @@ export default function TaskItem({
   toggleEditModal,
   showFromTodo,
 }: TaskItemProps) {
-  const { dispatch } = useTodoListData();
+  const checkTask = useTodoListStore((state) => state.checkTask);
   const { theme } = useThemeContext();
 
   function toggleList() {
-    dispatch({ type: "CHECK_TASK", payload: item.id });
+    checkTask(item.id);
   }
 
   const styles = createStyle(theme);

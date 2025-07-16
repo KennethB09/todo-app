@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { StyleSheet, Text, View } from "react-native";
 import { useThemeContext } from "@/context/ThemeContext";
 import { task } from "@/types/dataType";
-import { useTodoListData } from "@/context/todoListContext";
+import { useTodoListStore } from "@/context/zustand";
 
 type AgendaItemProps = {
   item: task;
@@ -10,9 +10,9 @@ type AgendaItemProps = {
 
 export default function AgendaItem({ item }: AgendaItemProps) {
   const { theme } = useThemeContext();
-  const { userData } = useTodoListData();
+  const todos = useTodoListStore((state) => state.userData.todos);
 
-  const parentTodo = userData.todos.find((todo) => todo.id === item.todoId);
+  const parentTodo = todos.find((todo) => todo.id === item.todoId);
 
   const styles = StyleSheet.create({
     mainContainer: {

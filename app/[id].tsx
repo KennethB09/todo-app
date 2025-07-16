@@ -1,22 +1,17 @@
 import {
   View,
-  Text,
   Pressable,
-  TouchableOpacity,
   Modal,
   StyleSheet,
   TextInput,
   Platform,
   ScrollView,
-  Dimensions,
   StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { task, Ttheme } from "@/types/dataType";
-import { useTodo } from "@/context/context";
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useTodoListData } from "@/context/todoListContext";
 import AddModal from "@/components/AddModal";
 import EditTask from "@/components/EditTask";
 import { useLocalNotification } from "@/context/notificationContext";
@@ -28,6 +23,8 @@ import ThemePicker from "@/components/ThemePicker";
 import DeleteModal from "@/components/DeleteModal";
 import GestureWrapper from "@/components/GestureWrapper";
 import TaskItem from "@/components/task_card/TaskItem";
+import { useTodoListStore } from "@/context/zustand";
+import EmptyList from "@/components/EmptyList";
 
 export type TadoListParam = {
   name: string;
@@ -41,43 +38,40 @@ export type TadoListParam = {
 };
 
 function TodoScreen() {
-  const { dispatch, userData } = useTodoListData();
-  const { theme, colorScheme, colorTheme } = useThemeContext();
-  const { data, setData } = useTodo();
+  useLocalNotification();
 
+  const { theme, colorScheme, colorTheme } = useThemeContext();
+
+  const { id, bg } = useLocalSearchParams();
+
+  const todos = useTodoListStore((state) => state.userData.todos);
+  const getParentTodo = todos.find((todo) => todo.id === id);
+  const tasks = useTodoListStore((state) => state.userData.tasks);
+  const taskData = tasks.filter((task) => task.todoId === id);
+  const todoId = id as string;
+  const bgColor = bg as string;
+  
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [toggleEdit, setToggleEdit] = useState(false);
   const [editDataList, setEditDataList] = useState<task>();
-  const [todoName, setTodoName] = useState(data?.title);
+  const [todoName, setTodoName] = useState(getParentTodo?.title);
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteTasktId, setDeleteTaskId] = useState<string>("");
-  const [taskData, setTaskData] = useState<task[]>([]);
-  const [newTodoBg, setNewTodoBg] = useState<string>(data!.bg);
-  useLocalNotification();
+  const [newTodoBg, setNewTodoBg] = useState<string>(bgColor);
+
+  const deleteTask = useTodoListStore((state) => state.deleteTask);
+  const updateTodo = useTodoListStore((state) => state.updateTodo);
 
   const Container = Platform.OS === "web" ? ScrollView : SafeAreaView;
-  const parentTodo = data;
-
-  useEffect(() => {
-    function getTask() {
-      if (!data) return;
-
-      const tasks = userData.tasks.filter((task) => task.todoId === data.id);
-      setTaskData(tasks);
-    }
-
-    getTask();
-  }, [userData.tasks]);
 
   useEffect(() => {
     function changeBgColor() {
       const updatedData = {
-        ...data!,
+        ...getParentTodo!,
         bg: newTodoBg,
       };
 
-      setData(updatedData);
-      dispatch({ type: "UPDATE_TODO", payload: updatedData });
+      updateTodo(updatedData);
     }
 
     changeBgColor();
@@ -97,23 +91,19 @@ function TodoScreen() {
   }
 
   function saveTodoName() {
-    if (data?.title === todoName) {
+    if (getParentTodo?.title === todoName) {
       return;
     }
 
     const updatedData = {
-      ...data!,
+      ...getParentTodo!,
       title: todoName!,
     };
 
-    setData(updatedData);
-    dispatch({ type: "UPDATE_TODO", payload: updatedData });
+    updateTodo(updatedData);
   }
 
-  const styles = useMemo(
-    () => createStyles(theme, colorScheme),
-    [theme, colorScheme]
-  );
+  const styles = createStyles(theme, colorScheme);
 
   function onDelete(id: string) {
     setDeleteTaskId(id);
@@ -161,29 +151,15 @@ function TodoScreen() {
           itemLayoutAnimation={LinearTransition}
           keyboardDismissMode={"on-drag"}
           keyExtractor={(item, index) => item.id}
-          ListEmptyComponent={
-            <View
-              style={{
-                width: "100%",
-                height: "100%",
-                justifyContent: "center",
-                alignContent: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: theme.listInfo,
-                  textAlign: "center",
-                  fontSize: 20,
-                }}
-              >
-                Add Task
-              </Text>
-            </View>
-          }
+          ListEmptyComponent={<EmptyList text="Add Task" />}
           renderItem={({ item }) => (
             <GestureWrapper onGesureEnd={() => onDelete(item.id)}>
-              <TaskItem item={item} parentTodo={parentTodo!} showFromTodo={false} toggleEditModal={toggleEditModal}/>
+              <TaskItem
+                item={item}
+                parentTodo={getParentTodo!}
+                showFromTodo={false}
+                toggleEditModal={toggleEditModal}
+              />
             </GestureWrapper>
           )}
         />
@@ -196,7 +172,7 @@ function TodoScreen() {
           visible={isOpen}
           onRequestClose={() => setIsOpen(!isOpen)}
         >
-          <AddModal isOpen setIsOpen={setIsOpen} />
+          <AddModal isOpen setIsOpen={setIsOpen} todoId={todoId}/>
         </Modal>
 
         <Modal
@@ -221,7 +197,7 @@ function TodoScreen() {
           <DeleteModal
             title="DELETE TASK"
             paragraph="Are you sure you want to delete this task?"
-            setDispatch={{ type: "DELETE_TASK", payload: deleteTasktId }}
+            setDispatch={() => deleteTask(deleteTasktId)}
             showDeleteModal={deleteModal}
             setShowDeleteModal={setDeleteModal}
           />

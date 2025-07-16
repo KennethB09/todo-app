@@ -22,14 +22,15 @@ import { useThemeContext } from "@/context/ThemeContext";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import RadioButton from "./RadioButton";
 import Checkbox from "expo-checkbox";
-import { useTodo } from "@/context/context";
-import { useTodoListData } from "@/context/todoListContext";
 import * as Notifications from "expo-notifications";
 import { schedulePushNotification } from "@/utils/handle-local-notification";
+import { useTodoListStore } from "@/context/zustand";
+import { useLocalSearchParams } from "expo-router";
 
 type modalProps = {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  todoId: string;
 };
 
 type Tcheckbox = {
@@ -38,7 +39,7 @@ type Tcheckbox = {
   value: day;
 };
 
-const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
+const AddModal = ({ isOpen, setIsOpen, todoId }: modalProps) => {
   const [name, setName] = useState("");
   const [radioValue, setRadioValue] = useState<"simple" | "scheduled">(
     "simple"
@@ -66,8 +67,7 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
   const { theme, colorScheme, colorTheme } = useThemeContext();
   const [isEmpty, setIsEmpty] = useState(false);
   const checkPlatform = Platform.OS === "android";
-  const { data } = useTodo();
-  const { dispatch, userData } = useTodoListData();
+  const addTask = useTodoListStore((state) => state.addTask);
 
   const onChange = (
     event: DateTimePickerEvent,
@@ -152,7 +152,7 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
     let task: task;
     if (radioValue === "scheduled") {
       task = {
-        todoId: data!.id,
+        todoId,
         id,
         name,
         isChecked: false,
@@ -174,7 +174,7 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
       };
     } else {
       task = {
-        todoId: data!.id,
+        todoId,
         id,
         name,
         isChecked: false,
@@ -182,7 +182,8 @@ const AddModal = ({ isOpen, setIsOpen }: modalProps) => {
       };
     }
 
-    dispatch({ type: "ADD_TASK", payload: task });
+    // dispatch({ type: "ADD_TASK", payload: task });
+    addTask(task);
     setName("");
     setIsOpen(!isOpen);
     setIsEmpty(false);

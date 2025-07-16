@@ -1,18 +1,14 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { todo } from "@/types/dataType";
-import { useTodoListData } from "@/context/todoListContext";
+import { useTodoListStore } from "@/context/zustand";
 import { useThemeContext } from "@/context/ThemeContext";
 
 type TCardProps = {
   item: todo;
-  onPress: () => void;
 };
 
-function Card({
-  item,
-  onPress
-}: TCardProps) {
-  const { userData } = useTodoListData();
+function Card({ item }: TCardProps) {
+  const userData = useTodoListStore((state) => state.userData);
   const { theme } = useThemeContext();
 
   const countCompletedTasks = userData.tasks.filter(
@@ -58,7 +54,7 @@ function Card({
   });
 
   return (
-    <Pressable onPress={onPress} style={styles.mainContainer}>
+    <View style={styles.mainContainer}>
       <View style={styles.card}>
         <Text style={styles.labelColor}>{item.title}</Text>
         <View style={styles.completeContainer}>
@@ -68,7 +64,7 @@ function Card({
           </Text>
         </View>
       </View>
-    </Pressable>
+    </View>
   );
 }
 

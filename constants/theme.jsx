@@ -1,18 +1,18 @@
 export const pastelBg = [
-    "#D2CCF2",
-    "#BEB9E2",
-    "#E8B7CA",
-    "#D8B0C8",
-    "#F68BA2",
-    "#DFCFF3",
-    "#ADE1EF",
-    "#C6EAEE",
-    "#B2EAD3",
-    "#B1E8ED",
-    "#ED8DD5",
-    "#C8EBEF",
-    "#C0F3EA",
-    "#F5E29E"
+    "#A89CE0",
+    "#948ED0",
+    "#D0889F",
+    "#BB83AD",
+    "#DC5D78",
+    "#BFA2E0",
+    "#7FCFDF",
+    "#93D4DC",
+    "#85D4B2",
+    "#84D1D7",
+    "#C35BB0",
+    "#93D6DA",
+    "#8ED9CE",
+    "#E0C769"
 ]
 
 export const Theme = {
