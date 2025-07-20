@@ -37,8 +37,9 @@ export default function AgendaItem({ item }: AgendaItemProps) {
       paddingHorizontal: 15,
       paddingVertical: 10,
       marginRight: 10,
-      height: 100,
+      height: "auto",
       width: "70%",
+      minHeight: 100
     },
     title: {
       fontFamily: theme.fontFamily,

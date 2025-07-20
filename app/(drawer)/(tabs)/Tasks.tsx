@@ -2,30 +2,10 @@ import { View, Text, StyleSheet, SectionList } from "react-native";
 import React from "react";
 import { useThemeContext } from "@/context/ThemeContext";
 import { useTodoListStore } from "@/context/zustand";
-import { task, Ttheme, day } from "@/types/dataType";
+import { task, Ttheme } from "@/types/dataType";
 import { format } from "date-fns";
 import TaskItem from "@/components/task_card/TaskItem";
-
-type TconvertDay = {
-  [key: string]: day;
-  sunday: day;
-  monday: day;
-  tuesday: day;
-  wednesday: day;
-  thursday: day;
-  friday: day;
-  saturday: day;
-};
-
-export const CONVERT_DAYS: TconvertDay = {
-  sunday: 1,
-  monday: 2,
-  tuesday: 3,
-  wednesday: 4,
-  thursday: 5,
-  friday: 6,
-  saturday: 7,
-};
+import { filterTasksForToday } from "@/utils/utility-functions";
 
 export default function Task() {
   const tasks = useTodoListStore((state) => state.userData.tasks);
@@ -33,103 +13,38 @@ export default function Task() {
   const { theme } = useThemeContext();
   const styles = createStyle(theme);
 
-  function filterTasksForToday(tasks: task[], today = new Date()) {
-    const todayDay = today
-      .toLocaleString("en-US", { weekday: "long" })
-      .toLowerCase();
-
-    const dueDateTask = tasks.filter(
-      (t) =>
-        t.taskType === "scheduled" &&
-        t.dueDate?.enabled &&
-        format(t.dueDate.date, "MM/dd/yyyy") === format(today, "MM/dd/yyyy")
-    );
-    const repeatTask = tasks.filter(
-      (t) =>
-        t.taskType === "scheduled" &&
-        !t.dueDate?.enabled &&
-        t.repeat?.includes(CONVERT_DAYS[todayDay])
-    );
-    const simpleTask = tasks.filter((t) => t.taskType === "simple");
-
-    return [...dueDateTask, ...repeatTask, ...simpleTask];
-  }
-
-  function filterTasksForYesterday(tasks: task[]) {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    const getYesterDay = yesterday
-      .toLocaleString("en-US", { weekday: "long" })
-      .toLowerCase();
-
-    const dueDateTask = tasks.filter(
-      (t) =>
-        t.taskType === "scheduled" &&
-        t.dueDate?.enabled &&
-        format(t.dueDate.date, "MM/dd/yyyy") ===
-          format(yesterday, "MM/dd/yyyy") &&
-        t.isChecked === false
-    );
-    const repeatTask = tasks.filter(
-      (t) =>
-        t.taskType === "scheduled" &&
-        !t.dueDate?.enabled &&
-        t.repeat?.includes(CONVERT_DAYS[getYesterDay]) &&
-        t.isChecked === false
-    );
-
-    return [...dueDateTask, ...repeatTask];
-  }
+  const todayTasks = tasks ? filterTasksForToday(tasks) : [];
 
   function filterTasksForPastDays(tasks: task[], today = new Date()) {
-    const todayDay = today
-      .toLocaleString("en-US", { weekday: "long" })
-      .toLowerCase();
-
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-
-    const getYesterDay = yesterday
-      .toLocaleString("en-US", { weekday: "long" })
-      .toLowerCase();
 
     const dueDateTask = tasks.filter(
       (t) =>
         t.taskType === "scheduled" &&
         t.dueDate?.enabled &&
         format(t.dueDate.date, "MM/dd/yyyy") !==
-          format(yesterday, "MM/dd/yyyy") &&
+          format(today, "MM/dd/yyyy") &&
         new Date(t.dueDate.date) < new Date(today.setHours(0, 0, 0, 0)) &&
         t.isChecked === false
     );
 
-    const repeatTask = tasks.filter(
-      (t) =>
-        t.taskType === "scheduled" &&
-        !t.dueDate?.enabled &&
-        t.repeat?.length !== 0 &&
-        t.isChecked === false &&
-        !t.repeat?.includes(CONVERT_DAYS[getYesterDay]) &&
-        !t.repeat?.includes(CONVERT_DAYS[todayDay])
-    );
-
-    return [...repeatTask, ...dueDateTask];
+    return dueDateTask;
   }
 
   const CATEGORIZE_TASKS = [
     {
-      title: "today",
-      data: filterTasksForToday(tasks),
+      title: "ongoing",
+      data: todayTasks.filter(task => task.isChecked === false),
     },
     {
-      title: "yesterday",
-      data: filterTasksForYesterday(tasks),
+      title: "finished",
+      data: todayTasks.filter(task => task.isChecked === true),
     },
     {
-      title: "past days",
+      title: "past the due-date",
       data: filterTasksForPastDays(tasks),
-    },
+    }
   ];
 
   return (

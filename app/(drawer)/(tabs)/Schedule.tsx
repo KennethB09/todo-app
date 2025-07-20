@@ -8,12 +8,14 @@ import {
   Dimensions,
 } from "react-native";
 import { format, eachDayOfInterval, addDays } from "date-fns";
-import { filterTasksForToday } from "@/components/HomeCards";
+import { filterTasksForToday } from "@/utils/utility-functions";
 import { useTodoListStore } from "@/context/zustand";
 import { useThemeContext } from "@/context/ThemeContext";
 import { Ttheme } from "@/types/dataType";
 import AgendaItem from "@/components/AgendaItem";
-import { CONVERT_DAYS } from "./Tasks";
+import { CONVERT_DAYS } from "@/utils/utility-functions";
+import EmptyList from "@/components/EmptyList";
+import { Link } from "expo-router";
 
 // Generate a date range (e.g., ±7 days from today)
 const today = new Date();
@@ -26,8 +28,9 @@ const ITEM_WIDTH = 50;
 const DAYS_PER_SNAP = 7;
 
 export default function CustomAgenda() {
-  const [selected, setSelected] = useState(format(today, "yyyy-MM-dd"));
   const tasks = useTodoListStore((state) => state.userData.tasks);
+  const todos = useTodoListStore((state) => state.userData.todos);
+  const [selected, setSelected] = useState(format(today, "yyyy-MM-dd"));
   const { theme, colorTheme } = useThemeContext();
   const thisMonth = format(today, "LLLL d");
   const todayTask = filterTasksForToday(tasks).filter(
@@ -168,9 +171,13 @@ export default function CustomAgenda() {
         <Text style={styles.agendaTitle}>Today's Tasks</Text>
         <FlatList
           data={selectedDayTasks}
+          ListEmptyComponent={<EmptyList text="No Tasks for this day" />}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <AgendaItem item={item} />}
-          contentContainerStyle={{ paddingBottom: 60 }}
+          renderItem={({ item }) => <Link href={{
+            pathname: "/[id]",
+            params: { id: item.todoId, bg: todos.find(t => t.id === item.todoId)?.bg },
+          }}><AgendaItem item={item} /></Link>}
+          contentContainerStyle={{ paddingBottom: 60, height: "100%" }}
           showsVerticalScrollIndicator={false}
         />
       </View>

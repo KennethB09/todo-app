@@ -39,6 +39,8 @@ import GestureWrapper from "@/components/GestureWrapper";
 import { useTodoListStore } from "@/context/zustand";
 import HomeCards from "@/components/HomeCards";
 import EmptyList from "@/components/EmptyList";
+import { filterTasksForToday } from "@/utils/utility-functions";
+import { format } from "date-fns";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MAX_TRANSLATE_Y = -SCREEN_HEIGHT * 0.4;
@@ -52,6 +54,7 @@ export default function HomeScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTodoId, setDeleteTodoId] = useState<string>("");
   const [isExpand, setIsExpand] = useState(false);
+  const [userLastOpened, setUserLastOpen] = useState<Date | null>(null);
 
   const translateY = useSharedValue(0);
   const prevTranslationY = useSharedValue(0);
@@ -60,6 +63,8 @@ export default function HomeScreen() {
   const deleteTodo = useTodoListStore((state) => state.deleteTodo);
   const todoList = useTodoListStore((state) => state.userData.todos);
   const userData = useTodoListStore((state) => state.userData);
+  const checkTask = useTodoListStore((state) => state.checkTask);
+  const taskForToday = filterTasksForToday(userData.tasks);
   const styles = createStyles(theme);
 
   const panGesture = Gesture.Pan()
@@ -156,6 +161,21 @@ export default function HomeScreen() {
     };
   }, []);
 
+  if (
+    userLastOpened &&
+    format(userLastOpened, "yyyy-dd-MM") !== format(new Date(), "yyyy-dd-MM")
+  ) {
+    for (let i = 0; i < taskForToday.length; i++) {
+      if (taskForToday[i].taskType === "simple") {
+        continue;
+      }
+
+      if (taskForToday[i].isChecked && taskForToday[i].dueDate?.enabled === false) {
+        checkTask(taskForToday[i].id);
+      }
+    }
+  }
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -179,8 +199,36 @@ export default function HomeScreen() {
       }
     }
 
+    async function getUserLastOpen() {
+      try {
+        const json = await AsyncStorage.getItem("userLastOpened");
+        const timestamp = json != null ? parseInt(json) : null;
+        if (timestamp) {
+          // console.log(new Date(timestamp))
+          setUserLastOpen(new Date(timestamp));
+        } else {
+          setUserLastOpen(new Date());
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    getUserLastOpen()
     fetchData();
   }, []);
+
+  useEffect(() => {
+    async function saveUserLastOpen() {
+      try {
+        await AsyncStorage.setItem("userLastOpened", Date.now().toString());
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    saveUserLastOpen()
+  }, [userLastOpened]);
 
   useEffect(() => {
     async function saveData() {
@@ -206,7 +254,7 @@ export default function HomeScreen() {
         backgroundColor={theme.background}
       />
 
-      <HomeCards />
+      <HomeCards todayTasks={taskForToday}/>
 
       <Container
         style={[

@@ -80,3 +80,14 @@ export type Ttheme = {
 export type TpastelTheme = {
   background: string[];
 };
+
+export type TconvertDay = {
+  [key: string]: day;
+  sunday: day;
+  monday: day;
+  tuesday: day;
+  wednesday: day;
+  thursday: day;
+  friday: day;
+  saturday: day;
+};

@@ -2,34 +2,17 @@ import { useTodoListStore } from "@/context/zustand";
 import { View, Text, StyleSheet } from "react-native";
 import { format } from "date-fns";
 import { task, Ttheme } from "@/types/dataType";
-import { CONVERT_DAYS } from "@/app/(drawer)/(tabs)/Tasks";
 import { useThemeContext } from "@/context/ThemeContext";
 
-export function filterTasksForToday(tasks: task[], today = new Date()) {
-  const todayDay = today
-    .toLocaleString("en-US", { weekday: "long" })
-    .toLowerCase();
-
-  const dueDateTask = tasks.filter(
-    (t) =>
-      t.taskType === "scheduled" &&
-      t.dueDate?.enabled &&
-      format(t.dueDate.date, "MM/dd/yyyy") === format(today, "MM/dd/yyyy")
-  );
-  const repeatTask = tasks.filter(
-    (t) =>
-      t.taskType === "scheduled" &&
-      !t.dueDate?.enabled &&
-      t.repeat?.includes(CONVERT_DAYS[todayDay])
-  );
-  const simpleTask = tasks.filter((t) => t.taskType === "simple");
-
-  return [...dueDateTask, ...repeatTask, ...simpleTask];
+type HomeCardsProps = {
+  todayTasks: task[];
 }
 
-export default function HomeCards({}) {
+export default function HomeCards({ todayTasks }: HomeCardsProps) {
   const userData = useTodoListStore((state) => state.userData);
   const { theme } = useThemeContext();
+  const todos = userData.todos.length;
+  const styles = createStyles(theme);
 
   function filterTasksForThisMonth(tasks: task[], today = new Date()) {
     const dueDateTask = tasks.filter(
@@ -45,33 +28,32 @@ export default function HomeCards({}) {
 
     return [...dueDateTask, ...repeatTask, ...simpleTask];
   }
-  const todayTasks = filterTasksForToday(userData.tasks).length;
+
   const monthTasks = filterTasksForThisMonth(userData.tasks).length;
-  const completedTasks = filterTasksForToday(userData.tasks).filter(
+  const completedTasks = todayTasks.filter(
     (task: task) => task.isChecked
   ).length;
-  const todos = userData.todos.length;
-  const styles = createStyles(theme);
+
   return (
     <View style={styles.cardContainer}>
       <View style={styles.todaysCard}>
-        <Text style={styles.todaysCardTitle}>Todays's Tasks</Text>
-        <Text style={styles.cardCount}>
-          {completedTasks} / {todayTasks}
+        <Text adjustsFontSizeToFit={true} style={styles.todaysCardTitle}>Today's Tasks</Text>
+        <Text adjustsFontSizeToFit={true} style={styles.cardCount}>
+          {completedTasks} / {todayTasks.length}
         </Text>
-        <Text style={styles.todaysCardText}>Completed</Text>
+        <Text adjustsFontSizeToFit={true} style={styles.todaysCardText}>Completed</Text>
       </View>
       <View style={styles.colCardContainer}>
         <View style={styles.monthCard}>
-          <Text style={styles.cardTitle}>This Month</Text>
+          <Text adjustsFontSizeToFit={true} style={styles.cardTitle}>This Month</Text>
           <View style={styles.cardCountContainer}>
-            <Text style={styles.cardCount}>{monthTasks}</Text>
-            <Text style={styles.cardCountLabel}>Tasks</Text>
+            <Text adjustsFontSizeToFit={true} style={styles.cardCount}>{monthTasks}</Text>
+            <Text adjustsFontSizeToFit={true} style={styles.cardCountLabel}>Tasks</Text>
           </View>
         </View>
         <View style={styles.todosCard}>
-          <Text style={styles.cardTitle}>Todo's</Text>
-          <Text style={styles.cardCount}>{todos}</Text>
+          <Text adjustsFontSizeToFit={true} style={styles.cardTitle}>Todo's</Text>
+          <Text adjustsFontSizeToFit={true} style={styles.cardCount}>{todos}</Text>
         </View>
       </View>
     </View>
@@ -79,8 +61,8 @@ export default function HomeCards({}) {
 }
 
 function createStyles(theme: Ttheme) {
-    return StyleSheet.create({
-        cardContainer: {
+  return StyleSheet.create({
+    cardContainer: {
       height: "35%",
       width: "100%",
       flexDirection: "row",
@@ -89,10 +71,10 @@ function createStyles(theme: Ttheme) {
     },
     todaysCard: {
       backgroundColor: "#D2CCF2",
-      paddingHorizontal: 10,
-      paddingVertical: 20,
+      padding: 20,
       borderRadius: 10,
       width: "49%",
+      height: "auto",
       justifyContent: "space-between",
       alignItems: "center",
     },
@@ -102,6 +84,8 @@ function createStyles(theme: Ttheme) {
       fontSize: theme.fontSizeEX,
       fontWeight: "semibold",
       color: theme.fontColor.primary,
+      textAlign: "left",
+      width: "100%"
     },
     cardCount: {
       textAlign: "center",
@@ -119,6 +103,7 @@ function createStyles(theme: Ttheme) {
     },
     colCardContainer: {
       width: "49%",
+      height: "100%",
       justifyContent: "space-between",
     },
     monthCard: {
@@ -127,7 +112,7 @@ function createStyles(theme: Ttheme) {
       paddingHorizontal: 20,
       borderRadius: 10,
       width: "100%",
-      height: "49%",
+      height: "48.5%",
       justifyContent: "space-between",
     },
     todosCard: {
@@ -136,7 +121,7 @@ function createStyles(theme: Ttheme) {
       padding: 10,
       borderRadius: 10,
       width: "100%",
-      height: "49%",
+      height: "48.5%",
       justifyContent: "space-between",
     },
     cardTitle: {
@@ -158,5 +143,5 @@ function createStyles(theme: Ttheme) {
       color: theme.pallete.lightGray,
       paddingBottom: 7,
     },
-    })
+  })
 }

@@ -6,6 +6,7 @@ import { useTodoListStore } from "@/context/zustand";
 import NotificationItem from "@/components/NotificationItem";
 import GestureWrapper from "@/components/GestureWrapper";
 import Animated, { LinearTransition } from "react-native-reanimated";
+import EmptyList from "@/components/EmptyList";
 
 export default function Notifications() {
   const notifications = useTodoListStore(
@@ -44,7 +45,9 @@ export default function Notifications() {
       <Animated.FlatList
         data={notifications}
         keyExtractor={(item) => item.id}
+        contentContainerStyle={{ height: "100%" }}
         itemLayoutAnimation={LinearTransition}
+        ListEmptyComponent={<EmptyList text="No Notifications"/>}
         keyboardDismissMode={"on-drag"}
         renderItem={({ item }) => (
           <GestureWrapper onGesureEnd={() => handleDelete(item.id)}>
