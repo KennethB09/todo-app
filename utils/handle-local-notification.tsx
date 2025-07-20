@@ -35,7 +35,6 @@ export const schedulePushNotification = async (
       let hour = 8;
       let minute = 0;
 
-      // If completion time is enabled, use its start time
       if (isCompletionTimeEnabled && completionTimeStart) {
         const reminderDate = isReminderEnabled
           ? addMinutes(new Date(completionTimeStart), -reminderOffset)
@@ -46,14 +45,15 @@ export const schedulePushNotification = async (
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "Reminder!",
+          title: "Repeating Task Reminder!",
           body: `Task ${name} is scheduled today!`,
+          sound: true
         },
         trigger: {
           type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
           weekday,
           hour,
-          minute,
+          minute
         },
       });
     }

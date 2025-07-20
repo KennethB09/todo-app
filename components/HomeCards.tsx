@@ -37,23 +37,23 @@ export default function HomeCards({ todayTasks }: HomeCardsProps) {
   return (
     <View style={styles.cardContainer}>
       <View style={styles.todaysCard}>
-        <Text adjustsFontSizeToFit={true} style={styles.todaysCardTitle}>Today's Tasks</Text>
-        <Text adjustsFontSizeToFit={true} style={styles.cardCount}>
+        <Text adjustsFontSizeToFit={true} numberOfLines={2} ellipsizeMode="tail" style={styles.todaysCardTitle}>Today's Tasks</Text>
+        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.cardCount}>
           {completedTasks} / {todayTasks.length}
         </Text>
-        <Text adjustsFontSizeToFit={true} style={styles.todaysCardText}>Completed</Text>
+        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.todaysCardText}>Completed</Text>
       </View>
       <View style={styles.colCardContainer}>
         <View style={styles.monthCard}>
-          <Text adjustsFontSizeToFit={true} style={styles.cardTitle}>This Month</Text>
+          <Text adjustsFontSizeToFit={true} numberOfLines={1} ellipsizeMode="tail" style={styles.cardTitle}>This Month</Text>
           <View style={styles.cardCountContainer}>
-            <Text adjustsFontSizeToFit={true} style={styles.cardCount}>{monthTasks}</Text>
-            <Text adjustsFontSizeToFit={true} style={styles.cardCountLabel}>Tasks</Text>
+            <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.cardCount}>{monthTasks}</Text>
+            <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.cardCountLabel}>Tasks</Text>
           </View>
         </View>
         <View style={styles.todosCard}>
-          <Text adjustsFontSizeToFit={true} style={styles.cardTitle}>Todo's</Text>
-          <Text adjustsFontSizeToFit={true} style={styles.cardCount}>{todos}</Text>
+          <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.cardTitle}>Todo's</Text>
+          <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.cardCount}>{todos}</Text>
         </View>
       </View>
     </View>
@@ -129,6 +129,8 @@ function createStyles(theme: Ttheme) {
       fontSize: theme.fonstSizeTitle,
       fontWeight: "semibold",
       color: theme.fontColor.primary,
+      width: "100%",
+      textAlign: "left"
     },
     cardCountContainer: {
       width: "100%",
