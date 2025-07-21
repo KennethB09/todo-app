@@ -177,7 +177,7 @@ export default function CustomAgenda() {
             pathname: "/[id]",
             params: { id: item.todoId, bg: todos.find(t => t.id === item.todoId)?.bg },
           }}><AgendaItem item={item} /></Link>}
-          contentContainerStyle={{ paddingBottom: 60, height: "100%" }}
+          contentContainerStyle={{ paddingBottom: 60, height: "80%" }}
           showsVerticalScrollIndicator={false}
         />
       </View>

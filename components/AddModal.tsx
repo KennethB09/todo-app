@@ -7,8 +7,9 @@ import {
   Platform,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
+  Dimensions
 } from "react-native";
+import uuid from 'react-native-uuid';
 import { day, task, Ttheme } from "@/types/dataType";
 import { useState } from "react";
 import {
@@ -25,7 +26,6 @@ import Checkbox from "expo-checkbox";
 import * as Notifications from "expo-notifications";
 import { schedulePushNotification } from "@/utils/handle-local-notification";
 import { useTodoListStore } from "@/context/zustand";
-import { useLocalSearchParams } from "expo-router";
 
 type modalProps = {
   isOpen: boolean;
@@ -130,26 +130,40 @@ const AddModal = ({ isOpen, setIsOpen, todoId }: modalProps) => {
     }
   }
 
-  function generateRandomId(length = 16) {
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let randomId = "";
-    for (let i = 0; i < length; i++) {
-      randomId += characters.charAt(
-        Math.floor(Math.random() * characters.length)
-      );
-    }
-    return randomId;
-  }
+  function generateId() {
+    return uuid.v4()
+  };
 
   async function saveTask() {
+    const id = generateId();
+    let identifier: string | undefined;
+    let task: task;
+    
     if (name.length === 0) {
       setIsEmpty(true);
       return;
     }
+    if (radioValue === "scheduled") {
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: false,
+          shouldSetBadge: false,
+        }),
+      });
 
-    const id = generateRandomId(16);
-    let task: task;
+      identifier = await schedulePushNotification(
+        isDueDateEnabled,
+        new Date(dueDate),
+        isReminderEnabled,
+        reminder,
+        name,
+        checkboxValues,
+        isCompletionTimeEnabled,
+        completionTimeStart
+      );
+    };
+    
     if (radioValue === "scheduled") {
       task = {
         todoId,
@@ -171,6 +185,7 @@ const AddModal = ({ isOpen, setIsOpen, todoId }: modalProps) => {
           enabled: isReminderEnabled,
           remind: reminder,
         },
+        notificationId: identifier
       };
     } else {
       task = {
@@ -182,32 +197,12 @@ const AddModal = ({ isOpen, setIsOpen, todoId }: modalProps) => {
       };
     }
 
-    // dispatch({ type: "ADD_TASK", payload: task });
+    console.log(task)
+
     addTask(task);
     setName("");
     setIsOpen(!isOpen);
     setIsEmpty(false);
-
-    if (radioValue === "scheduled") {
-      Notifications.setNotificationHandler({
-        handleNotification: async () => ({
-          shouldShowAlert: true,
-          shouldPlaySound: false,
-          shouldSetBadge: false,
-        }),
-      });
-
-      await schedulePushNotification(
-        isDueDateEnabled,
-        new Date(dueDate),
-        isReminderEnabled,
-        reminder,
-        name,
-        checkboxValues,
-        isCompletionTimeEnabled,
-        completionTimeStart
-      );
-    }
   }
 
   function formatTime(date: Date, type: "MM/dd/yyyy" | "HH:mm:ss") {

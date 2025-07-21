@@ -37,7 +37,7 @@ export default function RootLayout() {
     <GestureHandlerRootView>
       <ThemeProvider>
         <Stack>
-          <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen
             name="[id]"
             options={{ headerShown: false, animation: "slide_from_right" }}

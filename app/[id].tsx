@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { task, Ttheme } from "@/types/dataType";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import AddModal from "@/components/AddModal";
 import EditTask from "@/components/EditTask";
 import { useLocalNotification } from "@/context/notificationContext";
@@ -25,6 +25,7 @@ import GestureWrapper from "@/components/GestureWrapper";
 import TaskItem from "@/components/task_card/TaskItem";
 import { useTodoListStore } from "@/context/zustand";
 import EmptyList from "@/components/EmptyList";
+import * as Notifications from "expo-notifications";
 
 export type TadoListParam = {
   name: string;
@@ -105,10 +106,14 @@ function TodoScreen() {
 
   const styles = createStyles(theme, colorScheme);
 
-  function onDelete(id: string) {
+  async function onDelete(id: string, taskType: "simple" | "scheduled", notificationId?: string,) {
+    if (taskType === "scheduled") {
+      await Notifications.cancelScheduledNotificationAsync(notificationId!);
+    };
+
     setDeleteTaskId(id);
     setDeleteModal((prev) => !prev);
-  }
+  };
 
   return (
     <SafeAreaView style={styles.mainContainer}>
@@ -153,7 +158,7 @@ function TodoScreen() {
           keyExtractor={(item, index) => item.id}
           ListEmptyComponent={<EmptyList text="Add Task" />}
           renderItem={({ item }) => (
-            <GestureWrapper onGesureEnd={() => onDelete(item.id)}>
+            <GestureWrapper onGesureEnd={() => onDelete(item.id, item.taskType, item.notificationId)}>
               <TaskItem
                 item={item}
                 parentTodo={getParentTodo!}

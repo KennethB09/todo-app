@@ -153,13 +153,37 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
   }
 
   async function saveTask() {
-    
+    let edit_task: task;
+    let identifier: string | undefined;
+
     if (name.length === 0) {
       setIsEmpty(true);
       return;
     }
 
-    let edit_task: task;
+    if (radioValue === "scheduled" && completionTimeStart !== task?.completionTime?.start) {
+      Notifications.cancelScheduledNotificationAsync(task?.notificationId!)
+
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: false,
+          shouldSetBadge: false,
+        }),
+      });
+
+      identifier = await schedulePushNotification(
+        isDueDateEnabled,
+        new Date(dueDate!),
+        isReminderEnabled,
+        reminder!,
+        name,
+        checkboxValues!,
+        isCompletionTimeEnabled,
+        completionTimeStart!
+      );
+    }
+
     if (radioValue === "scheduled") {
       edit_task = {
         todoId: task!.todoId,
@@ -181,6 +205,7 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
           enabled: isReminderEnabled!,
           remind: reminder!,
         },
+        notificationId: identifier
       };
     } else {
       edit_task = {
@@ -192,30 +217,11 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
       };
     }
 
+    console.log(edit_task)
+
     editTask(edit_task)
     setName("");
     setIsOpen(!isOpen);
-
-    if (radioValue === "scheduled") {
-      Notifications.setNotificationHandler({
-        handleNotification: async () => ({
-          shouldShowAlert: true,
-          shouldPlaySound: false,
-          shouldSetBadge: false,
-        }),
-      });
-
-      await schedulePushNotification(
-        isDueDateEnabled,
-        new Date(dueDate!),
-        isReminderEnabled,
-        reminder!,
-        name,
-        checkboxValues!,
-        isCompletionTimeEnabled,
-        completionTimeStart!
-      );
-    }
   }
 
   function formatTime(date: Date, type: "MM/dd/yyyy" | "HH:mm:ss") {

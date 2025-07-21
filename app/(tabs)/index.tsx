@@ -28,13 +28,8 @@ import {
   GestureDetector,
   Gesture,
 } from "react-native-gesture-handler";
-import { Ttheme, UserData } from "@/types/dataType";
+import { Ttheme, UserData, task } from "@/types/dataType";
 import * as Notifications from "expo-notifications";
-import {
-  storeNotificationData,
-  checkForMissedNotifications,
-} from "@/utils/storeNotificationData";
-import { AppState, AppStateStatus } from "react-native";
 import GestureWrapper from "@/components/GestureWrapper";
 import { useTodoListStore } from "@/context/zustand";
 import HomeCards from "@/components/HomeCards";
@@ -114,52 +109,8 @@ export default function HomeScreen() {
   // Boilerplate data to use if no data is found in AsyncStorage
   const boilerData: UserData = {
     todos: [],
-    tasks: [],
-    notifications: [],
+    tasks: []
   };
-
-  useEffect(() => {
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: false,
-      }),
-    });
-
-    // This works when app is in foreground
-    const notificationListener = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        storeNotificationData(notification, "received_foreground");
-      }
-    );
-
-    // This works even when app was closed and user taps notification
-    const responseListener =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        storeNotificationData(response.notification, "user_interaction");
-      });
-
-    // Check for notifications when app becomes active
-    const handleAppStateChange = (nextAppState: AppStateStatus) => {
-      if (nextAppState === "active") {
-        checkForMissedNotifications();
-      }
-    };
-
-    const subscription = AppState.addEventListener(
-      "change",
-      handleAppStateChange
-    );
-
-    return () => {
-      notificationListener &&
-        Notifications.removeNotificationSubscription(notificationListener);
-      responseListener &&
-        Notifications.removeNotificationSubscription(responseListener);
-      subscription?.remove();
-    };
-  }, []);
 
   if (
     userLastOpened &&
@@ -184,14 +135,12 @@ export default function HomeScreen() {
         if (data) {
           setData({
             todos: data.todos,
-            tasks: data.tasks,
-            notifications: [],
+            tasks: data.tasks
           });
         } else {
           setData({
             todos: boilerData.todos,
-            tasks: boilerData.tasks,
-            notifications: boilerData.notifications,
+            tasks: boilerData.tasks
           });
         }
       } catch (error) {
@@ -242,10 +191,23 @@ export default function HomeScreen() {
     saveData();
   }, [todoList, userData]);
 
-  function onDelete(id: string) {
+  async function cancelScheduledNotification(tasks: task[]) {
+    for (let i = 0; i < tasks.length; i++) {
+      if (tasks[i].taskType === "simple") {
+        continue
+      };
+
+      await Notifications.cancelScheduledNotificationAsync(tasks[i].notificationId!)
+    }
+  };
+
+  async function onDelete(id: string) {
+    const cancelTaskScheduledNotif = userData.tasks.filter(task => task.todoId === id);
+    await cancelScheduledNotification(cancelTaskScheduledNotif);
+
     setDeleteTodoId(id);
     setShowDeleteModal(!showDeleteModal);
-  }
+  };
 
   return (
     <SafeAreaView style={styles.mainContainer}>

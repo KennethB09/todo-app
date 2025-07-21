@@ -1,7 +1,6 @@
 export interface UserData {
   todos: todo[];
   tasks: task[];
-  notifications: notification[];
 }
 
 // 1 = sunday, 2 = monday, etc.
@@ -27,19 +26,13 @@ export interface task {
     remind: number;
   };
   repeat?: day[];
+  notificationId?: string;
 }
 
 export interface todo {
   id: string;
   title: string;
   bg: string;
-}
-
-export interface notification {
-  id: string;
-  title: string;
-  content: string;
-  timestamp: Date;
 }
 
 export type Ttheme = {

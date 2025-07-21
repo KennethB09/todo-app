@@ -14,12 +14,12 @@ export const schedulePushNotification = async (
   isCompletionTimeEnabled: boolean,
   completionTimeStart: Date
 ) => {
+  let identifier
   const reminderTime = addMinutes(new Date(dueDate), -reminderOffset);
 
   const reminderFormatted = format(dueDate, "hh:mm a");
   if (isDueDateEnabled) {
-    await Notifications.scheduleNotificationAsync({
-      identifier: "review",
+    identifier = await Notifications.scheduleNotificationAsync({
       content: {
         title: "Reminder!",
         body: `Your task ${name} is due soon at ${reminderFormatted}!`,
@@ -43,7 +43,7 @@ export const schedulePushNotification = async (
         minute = reminderDate.getMinutes();
       }
 
-      await Notifications.scheduleNotificationAsync({
+      identifier = await Notifications.scheduleNotificationAsync({
         content: {
           title: "Repeating Task Reminder!",
           body: `Task ${name} is scheduled today!`,
@@ -58,6 +58,8 @@ export const schedulePushNotification = async (
       });
     }
   }
+
+  return identifier
 };
 
 export const registerForPushNotificationsAsync = async () => {

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { todo, task, UserData, notification } from "@/types/dataType";
+import { todo, task, UserData } from "@/types/dataType";
 
 type TuserDataState = {
   userData: UserData;
@@ -11,16 +11,12 @@ type TuserDataState = {
   createTodo: (todo: todo) => void;
   updateTodo: (todo: todo) => void;
   deleteTodo: (id: string) => void;
-  setNotifications: (notifications: notification[]) => void;
-  addNotification: (notification: notification) => void;
-  deleteNotification: (id: string) => void;
 };
 
 export const useTodoListStore = create<TuserDataState>((set, get) => ({
   userData: {
     todos: [],
-    tasks: [],
-    notifications: [],
+    tasks: []
   },
   setData: (data) =>
     set(() => ({
@@ -80,29 +76,6 @@ export const useTodoListStore = create<TuserDataState>((set, get) => ({
         ...state.userData,
         todos: state.userData.todos.filter((t) => t.id !== id),
         tasks: state.userData.tasks.filter((t) => t.todoId !== id)
-      },
-    })),
-  setNotifications: (notifications) =>
-    set((state) => ({
-      userData: {
-        ...state.userData,
-        notifications,
-      },
-    })),
-  addNotification: (notification) =>
-    set((state) => ({
-      userData: {
-        ...state.userData,
-        notifications: [notification, ...state.userData.notifications],
-      },
-    })),
-  deleteNotification: (id) =>
-    set((state) => ({
-      userData: {
-        ...state.userData,
-        notifications: state.userData.notifications.filter(
-          (n) => n.id !== id
-        ),
       },
     }))
 }));

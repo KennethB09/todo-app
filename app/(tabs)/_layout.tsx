@@ -1,41 +1,31 @@
 import { Tabs, useRouter } from "expo-router";
 import { Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, DrawerActions } from "@react-navigation/native";
 import { pastelBg } from "@/constants/theme";
 import { useThemeContext } from "@/context/ThemeContext";
 import { StyleSheet, View } from "react-native";
 import { todo } from "@/types/dataType";
 import { useTodoListStore } from "@/context/zustand";
+import uuid from 'react-native-uuid';
 
 export default function TabLayout() {
-  const { colorTheme, theme, colorScheme } = useThemeContext();
-  const navigation = useNavigation();
+  const { colorTheme, theme } = useThemeContext();
   const router = useRouter();
   const createNewTodo = useTodoListStore((state) => state.createTodo);
 
-  function generateRandomId(length = 16) {
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let randomId = "";
-    for (let i = 0; i < length; i++) {
-      randomId += characters.charAt(
-        Math.floor(Math.random() * characters.length)
-      );
-    }
-    return randomId;
+  function generateRandomId() {
+    return uuid.v4();
   }
 
   function createTodo() {
     const randomBg = Math.floor(Math.random() * pastelBg.length);
-    const newId = generateRandomId(12);
+    const newId = generateRandomId();
     const newTodo: todo = {
       id: newId,
       title: "New Todo",
       bg: pastelBg[randomBg],
     };
 
-    // dispatch({ type: "CREATE_TODO", payload: newTodo });
     createNewTodo(newTodo)
     router.push({ pathname: "/[id]", params: { id: newTodo.id, bg: newTodo.bg } });
   }
@@ -48,27 +38,6 @@ export default function TabLayout() {
         popToTopOnBlur: true,
         tabBarActiveTintColor: colorTheme,
         headerShown: true,
-        headerRight: () => {
-          return (
-            <Pressable
-              onPress={() => {
-                // Dispatch drawer toggle action to parent drawer
-                navigation.dispatch(DrawerActions.toggleDrawer());
-              }}
-              style={{ marginRight: 15 }}
-            >
-              <Ionicons
-                name="menu"
-                color={
-                  colorScheme === "dark"
-                    ? theme.pallete.light
-                    : theme.pallete.gray
-                }
-                size={40}
-              />
-            </Pressable>
-          );
-        },
         tabBarStyle: {
           borderTopRightRadius: 20,
           borderTopLeftRadius: 20,
@@ -169,10 +138,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="Notifications"
+        name="Settings"
         options={{
           headerShown: true,
-          title: "Notifications",
+          title: "Settings",
           headerTitleStyle: {
             color: colorTheme,
             fontSize: theme.fontSizeL,
@@ -184,7 +153,7 @@ export default function TabLayout() {
             backgroundColor: theme.background,
           },
           tabBarIcon: ({ color }) => (
-            <Ionicons name="notifications-outline" color={color} size={28} />
+            <Ionicons name="settings-outline" color={color} size={28} />
           ),
           animation: "shift",
           sceneStyle: { backgroundColor: theme.background },
