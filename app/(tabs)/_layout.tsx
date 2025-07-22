@@ -12,7 +12,7 @@ export default function TabLayout() {
   const { colorTheme, theme } = useThemeContext();
   const router = useRouter();
   const createNewTodo = useTodoListStore((state) => state.createTodo);
-
+  
   function generateRandomId() {
     return uuid.v4();
   }
@@ -74,7 +74,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="home-outline" color={color} size={28} />
           ),
-          animation: "shift",
           sceneStyle: { backgroundColor: theme.background },
         }}
       />
@@ -97,7 +96,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="list" color={color} size={28} />
           ),
-          animation: "shift",
           sceneStyle: { backgroundColor: theme.background },
         }}
       />
@@ -133,7 +131,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="calendar-outline" color={color} size={28} />
           ),
-          animation: "shift",
           sceneStyle: { backgroundColor: theme.background },
         }}
       />
@@ -155,7 +152,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="settings-outline" color={color} size={28} />
           ),
-          animation: "shift",
           sceneStyle: { backgroundColor: theme.background },
         }}
       />

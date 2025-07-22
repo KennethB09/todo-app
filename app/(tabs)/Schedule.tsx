@@ -6,6 +6,7 @@ import {
   StyleSheet,
   FlatList,
   Dimensions,
+  StatusBar
 } from "react-native";
 import { format, eachDayOfInterval, addDays } from "date-fns";
 import { filterTasksForToday } from "@/utils/utility-functions";
@@ -31,7 +32,7 @@ export default function CustomAgenda() {
   const tasks = useTodoListStore((state) => state.userData.tasks);
   const todos = useTodoListStore((state) => state.userData.todos);
   const [selected, setSelected] = useState(format(today, "yyyy-MM-dd"));
-  const { theme, colorTheme } = useThemeContext();
+  const { theme, colorTheme, colorScheme } = useThemeContext();
   const thisMonth = format(today, "LLLL d");
   const todayTask = filterTasksForToday(tasks).filter(
     (t) => t.isChecked === false
@@ -96,6 +97,11 @@ export default function CustomAgenda() {
 
   return (
     <View style={styles.mainContainer}>
+      <StatusBar
+        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={theme.background}
+      />
+
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{thisMonth}</Text>
         <Text style={styles.headerLabel}>{todayTask} Tasks</Text>
@@ -167,7 +173,7 @@ export default function CustomAgenda() {
         }}
       />
       {/* Agenda list */}
-      <View style={{ height: 500 }}>
+      <View style={{ height: "75%" }}>
         <Text style={styles.agendaTitle}>Today's Tasks</Text>
         <FlatList
           data={selectedDayTasks}
@@ -177,8 +183,7 @@ export default function CustomAgenda() {
             pathname: "/[id]",
             params: { id: item.todoId, bg: todos.find(t => t.id === item.todoId)?.bg },
           }}><AgendaItem item={item} /></Link>}
-          contentContainerStyle={{ paddingBottom: 60, height: "80%" }}
-          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 100, height: "auto" }}
         />
       </View>
     </View>
@@ -187,7 +192,9 @@ export default function CustomAgenda() {
 
 function createStyles(theme: Ttheme) {
   return StyleSheet.create({
-    mainContainer: {},
+    mainContainer: {
+      height: "100%"
+    },
     header: {
       alignItems: "center",
       marginBottom: 10,

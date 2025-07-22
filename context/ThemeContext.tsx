@@ -1,5 +1,5 @@
 import React, { createContext, ReactElement, ReactNode, useContext, useState, useEffect } from "react";
-import { Ttheme, TpastelTheme } from "@/types/dataType";
+import { Ttheme } from "@/types/dataType";
 import { Theme } from "@/constants/theme";
 import { Appearance } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";

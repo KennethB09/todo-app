@@ -138,7 +138,7 @@ const AddModal = ({ isOpen, setIsOpen, todoId }: modalProps) => {
     const id = generateId();
     let identifier: string | undefined;
     let task: task;
-    
+
     if (name.length === 0) {
       setIsEmpty(true);
       return;
@@ -163,7 +163,7 @@ const AddModal = ({ isOpen, setIsOpen, todoId }: modalProps) => {
         completionTimeStart
       );
     };
-    
+
     if (radioValue === "scheduled") {
       task = {
         todoId,
@@ -196,8 +196,6 @@ const AddModal = ({ isOpen, setIsOpen, todoId }: modalProps) => {
         taskType: radioValue,
       };
     }
-
-    console.log(task)
 
     addTask(task);
     setName("");
@@ -309,6 +307,8 @@ const AddModal = ({ isOpen, setIsOpen, todoId }: modalProps) => {
                 />
               )}
             </View>
+
+            <Text style={{ fontFamily: theme.fontFamily, color: theme.fontColor.secondary, fontSize: theme.fontSizeS }}>Note: Disable the Due Date to enable the Repeat section.</Text>
 
             <View
               style={[
@@ -490,6 +490,8 @@ const AddModal = ({ isOpen, setIsOpen, todoId }: modalProps) => {
                 <Picker.Item label="1 hour" value={60} />
               </Picker>
             </View>
+
+            <Text style={{ fontFamily: theme.fontFamily, color: theme.fontColor.secondary, fontSize: theme.fontSizeS }}>Note: Disable the Reminder to send you notification on time.</Text>
           </>
         )}
       </View>

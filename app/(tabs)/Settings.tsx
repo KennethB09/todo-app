@@ -1,5 +1,5 @@
 import { Ttheme } from "@/types/dataType";
-import { View, Text, Image, StyleSheet, Switch } from "react-native";
+import { View, Text, Image, StyleSheet, Switch, StatusBar } from "react-native";
 import { useThemeContext } from "@/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import ThemePicker from "@/components/ThemePicker";
@@ -10,6 +10,11 @@ export default function Settings() {
 
   return (
     <View style={styles.settingsContainer}>
+      <StatusBar
+        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={theme.background}
+      />
+
       <View style={styles.settingsSafeArea}>
         <View style={styles.settingsHeader}>
           <Image

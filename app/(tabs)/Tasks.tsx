@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, SectionList } from "react-native";
+import { View, Text, StyleSheet, SectionList, StatusBar } from "react-native";
 import React from "react";
 import { useThemeContext } from "@/context/ThemeContext";
 import { useTodoListStore } from "@/context/zustand";
@@ -10,7 +10,7 @@ import { filterTasksForToday } from "@/utils/utility-functions";
 export default function Task() {
   const tasks = useTodoListStore((state) => state.userData.tasks);
   const todos = useTodoListStore((state) => state.userData.todos);
-  const { theme } = useThemeContext();
+  const { theme, colorScheme } = useThemeContext();
   const styles = createStyle(theme);
 
   const todayTasks = tasks ? filterTasksForToday(tasks) : [];
@@ -24,7 +24,7 @@ export default function Task() {
         t.taskType === "scheduled" &&
         t.dueDate?.enabled &&
         format(t.dueDate.date, "MM/dd/yyyy") !==
-          format(today, "MM/dd/yyyy") &&
+        format(today, "MM/dd/yyyy") &&
         new Date(t.dueDate.date) < new Date(today.setHours(0, 0, 0, 0)) &&
         t.isChecked === false
     );
@@ -49,6 +49,11 @@ export default function Task() {
 
   return (
     <View style={styles.mainContainer}>
+      <StatusBar
+        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={theme.background}
+      />
+
       <SectionList
         sections={CATEGORIZE_TASKS}
         keyExtractor={(task) => task.id}
@@ -85,6 +90,7 @@ function createStyle(theme: Ttheme) {
       marginLeft: 15,
     },
     itemContainer: {
+      paddingTop: 10,
       paddingHorizontal: 15,
     },
     contentContainer: {

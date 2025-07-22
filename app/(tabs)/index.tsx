@@ -201,10 +201,13 @@ export default function HomeScreen() {
     }
   };
 
-  async function onDelete(id: string) {
-    const cancelTaskScheduledNotif = userData.tasks.filter(task => task.todoId === id);
+  async function handleDelete() {
+    const cancelTaskScheduledNotif = userData.tasks.filter(task => task.todoId === deleteTodoId);
+    deleteTodo(deleteTodoId);
     await cancelScheduledNotification(cancelTaskScheduledNotif);
+  };
 
+  function onDelete(id: string) {
     setDeleteTodoId(id);
     setShowDeleteModal(!showDeleteModal);
   };
@@ -269,7 +272,7 @@ export default function HomeScreen() {
           <DeleteModal
             title="DELETE TODO"
             paragraph="Are you sure you want to delete this todo?"
-            setDispatch={() => deleteTodo(deleteTodoId)}
+            setDispatch={async () => handleDelete()}
             setShowDeleteModal={setShowDeleteModal}
             showDeleteModal={showDeleteModal}
           />

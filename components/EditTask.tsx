@@ -217,8 +217,6 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
       };
     }
 
-    console.log(edit_task)
-
     editTask(edit_task)
     setName("");
     setIsOpen(!isOpen);
@@ -318,6 +316,8 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
                 />
               )}
             </View>
+
+            <Text style={{ fontFamily: theme.fontFamily, color: theme.fontColor.secondary, fontSize: theme.fontSizeS }}>Note: Disable the Due Date to enable the Repeat section.</Text>
 
             <View
               style={[
@@ -499,6 +499,8 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
                 <Picker.Item label="1 hour" value={60} />
               </Picker>
             </View>
+
+            <Text style={{ fontFamily: theme.fontFamily, color: theme.fontColor.secondary, fontSize: theme.fontSizeS }}>Note: Disable the Reminder to send you notification on time.</Text>
           </>
         )}
       </View>
