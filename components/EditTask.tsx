@@ -154,7 +154,7 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
 
   async function saveTask() {
     let edit_task: task;
-    let identifier: string | undefined;
+    let identifier: string[] = [];
 
     if (name.length === 0) {
       setIsEmpty(true);
@@ -162,13 +162,15 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
     }
 
     if (radioValue === "scheduled" && completionTimeStart !== task?.completionTime?.start) {
-      Notifications.cancelScheduledNotificationAsync(task?.notificationId!)
+      for (let i = 0; i < task?.notificationId!.length!; i++) {
+        Notifications.cancelScheduledNotificationAsync(task?.notificationId![i]!)
+      }
 
       Notifications.setNotificationHandler({
         handleNotification: async () => ({
           shouldShowAlert: true,
-          shouldPlaySound: false,
-          shouldSetBadge: false,
+          shouldPlaySound: true,
+          shouldSetBadge: true,
         }),
       });
 
@@ -183,6 +185,8 @@ const EditTask = ({ task, isOpen, setIsOpen }: modalProps) => {
         completionTimeStart!
       );
     }
+
+    // console.log("New Identifier:", identifier)
 
     if (radioValue === "scheduled") {
       edit_task = {

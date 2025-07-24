@@ -39,7 +39,7 @@ export type TadoListParam = {
 };
 
 function TodoScreen() {
-  useLocalNotification();
+  // useLocalNotification();
 
   const { theme, colorScheme, colorTheme } = useThemeContext();
 
@@ -106,9 +106,11 @@ function TodoScreen() {
 
   const styles = createStyles(theme, colorScheme);
 
-  async function onDelete(id: string, taskType: "simple" | "scheduled", notificationId?: string,) {
+  async function onDelete(id: string, taskType: "simple" | "scheduled", notificationId?: string[],) {
     if (taskType === "scheduled") {
-      await Notifications.cancelScheduledNotificationAsync(notificationId!);
+      for (let i = 0; i < notificationId?.length!; i++) {
+        await Notifications.cancelScheduledNotificationAsync(notificationId![i]);
+      }
     };
 
     setDeleteTaskId(id);
@@ -155,7 +157,7 @@ function TodoScreen() {
           data={taskData}
           itemLayoutAnimation={LinearTransition}
           keyboardDismissMode={"on-drag"}
-          keyExtractor={(item, index) => item.id}
+          keyExtractor={(item) => item.id}
           ListEmptyComponent={<EmptyList text="Add Task" />}
           renderItem={({ item }) => (
             <GestureWrapper onGesureEnd={() => onDelete(item.id, item.taskType, item.notificationId)}>

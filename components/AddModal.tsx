@@ -136,7 +136,7 @@ const AddModal = ({ isOpen, setIsOpen, todoId }: modalProps) => {
 
   async function saveTask() {
     const id = generateId();
-    let identifier: string | undefined;
+    let identifier: string[] = [];
     let task: task;
 
     if (name.length === 0) {
@@ -147,8 +147,8 @@ const AddModal = ({ isOpen, setIsOpen, todoId }: modalProps) => {
       Notifications.setNotificationHandler({
         handleNotification: async () => ({
           shouldShowAlert: true,
-          shouldPlaySound: false,
-          shouldSetBadge: false,
+          shouldPlaySound: true,
+          shouldSetBadge: true,
         }),
       });
 
@@ -163,6 +163,8 @@ const AddModal = ({ isOpen, setIsOpen, todoId }: modalProps) => {
         completionTimeStart
       );
     };
+
+    // console.log("Identifier:", identifier)
 
     if (radioValue === "scheduled") {
       task = {
@@ -503,6 +505,7 @@ const AddModal = ({ isOpen, setIsOpen, todoId }: modalProps) => {
             borderRadius: 10,
             borderWidth: 1,
             borderColor: colorTheme,
+            backgroundColor: theme.background,
             paddingVertical: 10,
             paddingHorizontal: 20,
             justifyContent: "center",

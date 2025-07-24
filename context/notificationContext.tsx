@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import * as Notifications from "expo-notifications";
 import { registerForPushNotificationsAsync } from "@/utils/handle-local-notification";
@@ -12,8 +14,8 @@ export const useLocalNotification = (): ILocalNotificationHook => {
   const [notification, setNotification] = useState(
     {} as Notifications.Notification
   );
-  const notificationListener = useRef<Notifications.Subscription | undefined>();
-  const responseListener = useRef<Notifications.Subscription | undefined>();
+  const notificationListener = useRef<Notifications.EventSubscription | undefined>();
+  const responseListener = useRef<Notifications.EventSubscription | undefined>();
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => {
@@ -42,3 +44,22 @@ export const useLocalNotification = (): ILocalNotificationHook => {
 
   return { expoPushToken, notification };
 };
+
+export async function toggleNotificationPermission(value: boolean) {
+  const { status } = await Notifications.getPermissionsAsync();
+  
+  if (value) {   
+    if (status !== "granted") {
+      useLocalNotification()
+    };
+    await AsyncStorage.setItem('notificationsEnabled', 'true');
+  } else {
+    await AsyncStorage.setItem('notificationsEnabled', 'false');
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    Alert.alert(
+          'Notification Permission',
+          'Enable notifications to recieve reminders.',
+          [{ text: 'OK' }]
+        );
+  }
+}

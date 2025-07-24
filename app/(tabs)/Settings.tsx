@@ -3,10 +3,46 @@ import { View, Text, Image, StyleSheet, Switch, StatusBar } from "react-native";
 import { useThemeContext } from "@/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import ThemePicker from "@/components/ThemePicker";
+import { toggleNotificationPermission } from "@/context/notificationContext";
+import { useState, useEffect } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Settings() {
   const { colorScheme, theme, colorTheme, setColorScheme, setColorTheme } = useThemeContext();
+  const [allowNotifications, setAllowNotifications] = useState(false);
   const styles = createStyles(theme);
+
+  useEffect(() => {
+    async function getPermission() {
+      
+      try {
+        const permission = await AsyncStorage.getItem("notificationsEnabled");
+        const data = permission !== null ? JSON.parse(permission) : null;
+        if (data) {
+          if (data) {
+            setAllowNotifications(true);
+          } else {
+            setAllowNotifications(false)
+          }
+        } else {
+          setAllowNotifications(false)
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    getPermission()
+  }, [])
+  
+  function handleNotificationPermission() {
+    setAllowNotifications(prev => !prev)
+    if (allowNotifications) {
+      toggleNotificationPermission(false);
+    } else {
+      toggleNotificationPermission(true);
+    }
+  };
 
   return (
     <View style={styles.settingsContainer}>
@@ -63,6 +99,26 @@ export default function Settings() {
           <ThemePicker color={colorTheme} setColor={setColorTheme} />
         </View>
       </View>
+        <Text style={styles.settingsTitle}>Notification</Text>
+        <View style={styles.settingsContentRow}>
+          <View style={styles.settingsContentLabel}>
+            <Ionicons
+              style={styles.settingsContentIcon}
+              name="notifications-outline"
+            />
+            <Text style={styles.settingsContentText}>
+              Allow Notifications
+            </Text>
+          </View>
+          <Switch
+            trackColor={{
+              true: colorTheme,
+            }}
+            thumbColor={theme.pallete.lightGray}
+            onValueChange={handleNotificationPermission}
+            value={allowNotifications}
+          />
+        </View>
     </View>
   )
 }

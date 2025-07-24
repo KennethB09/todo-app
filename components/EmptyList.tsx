@@ -12,7 +12,7 @@ export default function EmptyList({ text }: EmptyListProps) {
     <View
       style={{
         width: "100%",
-        height: "100%",
+        height: 400,
         justifyContent: "center",
         alignContent: "center",
       }}

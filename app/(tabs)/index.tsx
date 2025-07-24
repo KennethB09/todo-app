@@ -36,6 +36,8 @@ import HomeCards from "@/components/HomeCards";
 import EmptyList from "@/components/EmptyList";
 import { filterTasksForToday } from "@/utils/utility-functions";
 import { format } from "date-fns";
+import { useLocalNotification } from "@/context/notificationContext";
+import * as NavigationBar from 'expo-navigation-bar';
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MAX_TRANSLATE_Y = -SCREEN_HEIGHT * 0.4;
@@ -61,6 +63,8 @@ export default function HomeScreen() {
   const checkTask = useTodoListStore((state) => state.checkTask);
   const taskForToday = filterTasksForToday(userData.tasks);
   const styles = createStyles(theme);
+  useLocalNotification();
+  NavigationBar.setBackgroundColorAsync(theme.background);
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
@@ -112,72 +116,75 @@ export default function HomeScreen() {
     tasks: []
   };
 
-  if (
-    userLastOpened &&
-    format(userLastOpened, "yyyy-dd-MM") !== format(new Date(), "yyyy-dd-MM")
-  ) {
+useEffect(() => {
+  async function fetchData() {
+    try {
+      const json = await AsyncStorage.getItem("userData");
+      const data: UserData = json != null ? JSON.parse(json) : null;
+      
+      if (data) {
+        setData({
+          todos: data.todos,
+          tasks: data.tasks
+        });
+      } else {
+        setData({
+          todos: boilerData.todos,
+          tasks: boilerData.tasks
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function getUserLastOpen() {
+    try {
+      const json = await AsyncStorage.getItem("userLastOpened");
+      const timestamp = json != null ? parseInt(json) : null;
+      if (timestamp) {
+        setUserLastOpen(new Date(timestamp));
+      } else {
+        // If no previous timestamp, set to yesterday to trigger the logic
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        setUserLastOpen(yesterday);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  getUserLastOpen();
+  fetchData();
+}, []);
+
+useEffect(() => {
+  if (!userLastOpened || !taskForToday.length) return;
+
+  // Check if this is a new day since last opening
+  if (format(userLastOpened, "yyyy-MM-dd") !== format(new Date(), "yyyy-MM-dd")) {
     for (let i = 0; i < taskForToday.length; i++) {
       if (taskForToday[i].taskType === "simple") {
         continue;
       }
-
       if (taskForToday[i].isChecked && taskForToday[i].dueDate?.enabled === false) {
         checkTask(taskForToday[i].id);
       }
     }
   }
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const json = await AsyncStorage.getItem("userData");
-        const data: UserData = json != null ? JSON.parse(json) : null;
-        if (data) {
-          setData({
-            todos: data.todos,
-            tasks: data.tasks
-          });
-        } else {
-          setData({
-            todos: boilerData.todos,
-            tasks: boilerData.tasks
-          });
-        }
-      } catch (error) {
-        console.error(error);
-      }
+  // Save the new timestamp AFTER doing the comparison
+  async function saveUserLastOpen() {
+    try {
+      await AsyncStorage.setItem("userLastOpened", Date.now().toString());
+    } catch (error) {
+      console.log(error);
     }
-
-    async function getUserLastOpen() {
-      try {
-        const json = await AsyncStorage.getItem("userLastOpened");
-        const timestamp = json != null ? parseInt(json) : null;
-        if (timestamp) {
-          // console.log(new Date(timestamp))
-          setUserLastOpen(new Date(timestamp));
-        } else {
-          setUserLastOpen(new Date());
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    getUserLastOpen()
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    async function saveUserLastOpen() {
-      try {
-        await AsyncStorage.setItem("userLastOpened", Date.now().toString());
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
-    saveUserLastOpen()
-  }, [userLastOpened]);
+  }
+  saveUserLastOpen();
+  
+}, [userLastOpened, taskForToday]);
 
   useEffect(() => {
     async function saveData() {
@@ -196,8 +203,9 @@ export default function HomeScreen() {
       if (tasks[i].taskType === "simple") {
         continue
       };
-
-      await Notifications.cancelScheduledNotificationAsync(tasks[i].notificationId!)
+      for (let j = 0; j < tasks[i].notificationId!.length; j++) {
+        await Notifications.cancelScheduledNotificationAsync(tasks[i].notificationId![j]);
+      }
     }
   };
 

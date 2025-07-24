@@ -26,7 +26,7 @@ export interface task {
     remind: number;
   };
   repeat?: day[];
-  notificationId?: string;
+  notificationId?: string[];
 }
 
 export interface todo {
