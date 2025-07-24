@@ -177,7 +177,7 @@ export default function CustomAgenda() {
         <Text style={styles.agendaTitle}>Today's Tasks</Text>
         <FlatList
           data={selectedDayTasks}
-          ListEmptyComponent={<EmptyList text="No Tasks for this day" />}
+          ListEmptyComponent={<EmptyList text="No Tasks for this day" height={400}/>}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <Link href={{
             pathname: "/[id]",

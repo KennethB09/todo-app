@@ -1,18 +1,19 @@
-import { Text, View } from "react-native";
+import { DimensionValue, Text, View } from "react-native";
 import { useThemeContext } from "@/context/ThemeContext";
 
 type EmptyListProps = {
-    text: string
+    text: string;
+    height: DimensionValue | undefined;
 }
 
-export default function EmptyList({ text }: EmptyListProps) {
+export default function EmptyList({ text, height }: EmptyListProps) {
   const { theme } = useThemeContext();
 
   return (
     <View
       style={{
         width: "100%",
-        height: 400,
+        height: height,
         justifyContent: "center",
         alignContent: "center",
       }}

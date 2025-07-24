@@ -7,11 +7,13 @@ import { StyleSheet, View } from "react-native";
 import { todo } from "@/types/dataType";
 import { useTodoListStore } from "@/context/zustand";
 import uuid from 'react-native-uuid';
+import * as NavigationBar from 'expo-navigation-bar';
 
 export default function TabLayout() {
   const { colorTheme, theme } = useThemeContext();
   const router = useRouter();
   const createNewTodo = useTodoListStore((state) => state.createTodo);
+  NavigationBar.setBackgroundColorAsync(theme.background);
   
   function generateRandomId() {
     return uuid.v4();

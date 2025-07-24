@@ -6,6 +6,7 @@ import { task, Ttheme } from "@/types/dataType";
 import { format } from "date-fns";
 import TaskItem from "@/components/task_card/TaskItem";
 import { filterTasksForToday } from "@/utils/utility-functions";
+import EmptyList from "@/components/EmptyList";
 
 export default function Task() {
   const tasks = useTodoListStore((state) => state.userData.tasks);
@@ -58,6 +59,7 @@ export default function Task() {
         sections={CATEGORIZE_TASKS}
         keyExtractor={(task) => task.id}
         contentContainerStyle={styles.contentContainer}
+        ListEmptyComponent={<EmptyList text="No tasks for Today" height={"100%"}/>}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
             <TaskItem

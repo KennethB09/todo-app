@@ -37,7 +37,6 @@ import EmptyList from "@/components/EmptyList";
 import { filterTasksForToday } from "@/utils/utility-functions";
 import { format } from "date-fns";
 import { useLocalNotification } from "@/context/notificationContext";
-import * as NavigationBar from 'expo-navigation-bar';
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MAX_TRANSLATE_Y = -SCREEN_HEIGHT * 0.4;
@@ -64,7 +63,6 @@ export default function HomeScreen() {
   const taskForToday = filterTasksForToday(userData.tasks);
   const styles = createStyles(theme);
   useLocalNotification();
-  NavigationBar.setBackgroundColorAsync(theme.background);
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
@@ -254,7 +252,7 @@ useEffect(() => {
           data={todoList}
           itemLayoutAnimation={LinearTransition}
           keyExtractor={(item) => item.id}
-          ListEmptyComponent={<EmptyList text="Create Todo" />}
+          ListEmptyComponent={<EmptyList text="Create Todo" height={"100%"}/>}
           renderItem={({ item }) => (
             <GestureWrapper onGesureEnd={() => onDelete(item.id)} iconSize={30}>
               <Link
