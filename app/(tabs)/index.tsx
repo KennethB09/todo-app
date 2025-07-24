@@ -252,7 +252,7 @@ useEffect(() => {
           data={todoList}
           itemLayoutAnimation={LinearTransition}
           keyExtractor={(item) => item.id}
-          ListEmptyComponent={<EmptyList text="Create Todo" height={"100%"}/>}
+          ListEmptyComponent={<EmptyList text="Create Todo" height={isExpand ? "100%" : "70%"}/>}
           renderItem={({ item }) => (
             <GestureWrapper onGesureEnd={() => onDelete(item.id)} iconSize={30}>
               <Link

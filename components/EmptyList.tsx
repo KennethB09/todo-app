@@ -20,9 +20,12 @@ export default function EmptyList({ text, height }: EmptyListProps) {
     >
       <Text
         style={{
-          color: theme.listInfo,
+          color: theme.fontColor.tertiary,
+          fontFamily: theme.fontFamily,
           textAlign: "center",
-          fontSize: 20,
+          fontSize: 15,
+          textTransform: "uppercase",
+          fontWeight: "bold"
         }}
       >
         {text}

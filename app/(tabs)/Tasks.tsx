@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, SectionList, StatusBar } from "react-native";
+import { View, Text, StyleSheet, SectionList, StatusBar, Dimensions } from "react-native";
 import React from "react";
 import { useThemeContext } from "@/context/ThemeContext";
 import { useTodoListStore } from "@/context/zustand";
@@ -7,6 +7,8 @@ import { format } from "date-fns";
 import TaskItem from "@/components/task_card/TaskItem";
 import { filterTasksForToday } from "@/utils/utility-functions";
 import EmptyList from "@/components/EmptyList";
+
+const { height } = Dimensions.get("window");
 
 export default function Task() {
   const tasks = useTodoListStore((state) => state.userData.tasks);
@@ -56,10 +58,10 @@ export default function Task() {
       />
 
       <SectionList
-        sections={CATEGORIZE_TASKS}
+        sections={todayTasks.length === 0 ? [] : CATEGORIZE_TASKS}
         keyExtractor={(task) => task.id}
         contentContainerStyle={styles.contentContainer}
-        ListEmptyComponent={<EmptyList text="No tasks for Today" height={"100%"}/>}
+        ListEmptyComponent={<EmptyList text="No tasks for Today" height={height - 50}/>}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
             <TaskItem
@@ -80,7 +82,7 @@ export default function Task() {
 function createStyle(theme: Ttheme) {
   return StyleSheet.create({
     mainContainer: {
-      height: "100%",
+      height: height,
       width: "100%",
       backgroundColor: theme.background,
     },
@@ -97,6 +99,7 @@ function createStyle(theme: Ttheme) {
     },
     contentContainer: {
       paddingBottom: 120,
+      height: "auto"
     },
   });
 }

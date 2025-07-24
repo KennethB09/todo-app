@@ -7,6 +7,7 @@ import {
   Platform,
   ScrollView,
   StatusBar,
+  Dimensions
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
@@ -38,9 +39,9 @@ export type TadoListParam = {
   reminder: Date | null;
 };
 
-function TodoScreen() {
-  // useLocalNotification();
+const { height } = Dimensions.get("window");
 
+function TodoScreen() {
   const { theme, colorScheme, colorTheme } = useThemeContext();
 
   const { id, bg } = useLocalSearchParams();
@@ -158,7 +159,7 @@ function TodoScreen() {
           itemLayoutAnimation={LinearTransition}
           keyboardDismissMode={"on-drag"}
           keyExtractor={(item) => item.id}
-          ListEmptyComponent={<EmptyList text="Add Task" />}
+          ListEmptyComponent={<EmptyList text="Add Task" height={height - 50}/>}
           renderItem={({ item }) => (
             <GestureWrapper onGesureEnd={() => onDelete(item.id, item.taskType, item.notificationId)}>
               <TaskItem
@@ -221,7 +222,7 @@ function createStyles(theme: Ttheme, colorScheme: string | null | undefined) {
     mainContainer: {
       backgroundColor: theme.background,
       padding: 10,
-      height: "100%",
+      height: height,
       width: "100%",
     },
     header: {
@@ -241,8 +242,9 @@ function createStyles(theme: Ttheme, colorScheme: string | null | undefined) {
     },
     listContainer: {
       padding: 10,
+      paddingBottom: 20,
       gap: 5,
-      height: "100%",
+      height: "auto",
     },
     listTitle: {
       color: theme.white,
