@@ -158,6 +158,17 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
+
+  async function saveUserLastOpen() {
+    try {
+      await AsyncStorage.setItem("userLastOpened", Date.now().toString());
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  
+  saveUserLastOpen();
+
   if (!userLastOpened || !taskForToday.length) return;
 
   // Check if this is a new day since last opening
@@ -171,16 +182,6 @@ useEffect(() => {
       }
     }
   }
-
-  // Save the new timestamp AFTER doing the comparison
-  async function saveUserLastOpen() {
-    try {
-      await AsyncStorage.setItem("userLastOpened", Date.now().toString());
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  saveUserLastOpen();
   
 }, [userLastOpened, taskForToday]);
 

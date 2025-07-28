@@ -44,7 +44,8 @@ function ThemeProvider({ children }: { children: ReactNode }): ReactElement {
                     setColorScheme(theme.colorScheme);
                     setColorTheme(theme.colorTheme);
                 } else {
-                    setColorScheme(Appearance.getColorScheme())
+                    setColorScheme(Appearance.getColorScheme());
+                    setColorTheme(Theme.dark.pallete.pink);
                 }
             } catch (error) {
                 console.error(error)
